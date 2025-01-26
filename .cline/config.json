@@ -1,0 +1,8 @@
+{
+    "github": {
+      "autoCommit": true,
+      "commitMessage": "feat: {description}",
+      "autoPush": true,
+      "branch": "main"
+    }
+  }
