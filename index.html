@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Em3rsa - 3D AI Agents</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
+    <script type="module" src="/js/main.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow-x: hidden;
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        #menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        #menu-btn span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #fff;
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        #menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 80px 20px;
+            transition: 0.3s;
+            z-index: 999;
+        }
+
+        #menu.active {
+            left: 0;
+        }
+
+        #menu a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 0;
+            font-size: 18px;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 100px 50px;
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .placeholder {
+            width: 80%;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .auth-section {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <button id="menu-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav id="menu">
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="auth-section">
+        <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    </div>
+
+    <div class="content">
+        <section id="home" class="section">
+            <h1>Em3rsa</h1>
+            <p>Exploring the Future of 3D AI Agents</p>
+            <div class="placeholder">Image Placeholder</div>
+            <div class="placeholder">Video Placeholder</div>
+        </section>
+
+        <section id="about" class="section">
+            <h2>About Us</h2>
+            <p>Learn more about Em3rsa and our mission in the world of 3D AI Agents.</p>
+        </section>
+
+        <section id="contact" class="section">
+            <h2>Contact</h2>
+            <p>Get in touch with us to learn more about our services.</p>
+        </section>
+    </div>
+
+</body>
+</html>
