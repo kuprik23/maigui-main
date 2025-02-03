@@ -20,12 +20,45 @@
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
     <script src="https://cdn.convai.com/sdk/web-sdk.js"></script>
-    <script type="module" src="/js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        .hero-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: url('/eye.jpg') center/cover no-repeat;
+            filter: brightness(0.7) saturate(1.2);
+            z-index: -2;
+            animation: pulseEffect 15s ease-in-out infinite;
+        }
+
+        .hero-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(
+                135deg,
+                rgba(0, 0, 0, 0.9) 0%,
+                rgba(0, 0, 0, 0.7) 50%,
+                rgba(0, 0, 0, 0.9) 100%
+            );
+            z-index: -1;
+        }
+
+        @keyframes pulseEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         body {
@@ -318,9 +351,47 @@
             border-color: rgba(255, 255, 255, 0.3);
             transform: translateY(-1px);
         }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 3rem;
+            padding: 0 1rem;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .feature h3 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
+    <div class="hero-background"></div>
+    <div class="hero-overlay"></div>
+    
     <button id="menu-btn">
         <span></span>
         <span></span>
@@ -338,8 +409,8 @@
 
     <div class="content">
         <section id="home" class="section">
-            <h1>Em3rsa</h1>
-            <p>Exploring the Future of 3D AI Agents</p>
+            <h1 style="font-size: 4rem; margin-bottom: 1rem; background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none;">Em3rsa</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 2rem; color: rgba(255, 255, 255, 0.9);">Exploring the Future of 3D AI Agents</p>
             <div class="model-viewer">
                 <div id="canvas-container"></div>
                 <div id="convai-container"></div>
@@ -388,6 +459,5 @@
             <p>Get in touch with us to learn more about our services.</p>
         </section>
     </div>
-
 </body>
 </html>

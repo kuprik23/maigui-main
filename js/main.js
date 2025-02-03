@@ -1,5 +1,80 @@
 import * as THREE from 'three';
 
+// Initialize Convai SDK
+const convaiClient = new window.CONVAI_SDK.ConvaiClient({
+    apiKey: '65bf9ae68038238e590ce2857b7d933b',
+    characterId: '63eba3f89146e9c36c6e5751', // Using a specific character ID
+    enableAudio: true,
+    container: 'convai-container',
+    enableVoiceInput: true,
+    enableTextInput: true,
+    enableTextOutput: true,
+    enableAutoplay: true,
+    enableProfanityFilter: true,
+    language: 'en-US'
+});
+
+// Initialize character with error handling
+document.addEventListener('DOMContentLoaded', () => {
+    const outputDiv = document.getElementById('convai-output');
+    const inputField = document.getElementById('convai-input');
+    const sendButton = document.getElementById('convai-send');
+
+    // Helper function to append messages to output
+    function appendMessage(text, isAI = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = isAI ? 'ai-message' : 'user-message';
+        messageDiv.style.marginBottom = '10px';
+        messageDiv.style.padding = '8px 12px';
+        messageDiv.style.borderRadius = '6px';
+        messageDiv.style.background = isAI ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.3)';
+        messageDiv.textContent = text;
+        outputDiv.appendChild(messageDiv);
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+    }
+
+    // Set up response callback
+    convaiClient.setResponseCallback((response) => {
+        console.log('AI Response:', response);
+        if (response && response.text) {
+            appendMessage(response.text, true);
+        }
+    });
+
+    // Set up error callback
+    convaiClient.setErrorCallback((error) => {
+        console.error('Convai Error:', error);
+        appendMessage('Sorry, there was an error processing your request.', true);
+    });
+
+    // Handle send button click
+    function sendMessage() {
+        const message = inputField.value.trim();
+        if (message) {
+            appendMessage(message, false);
+            convaiClient.sendTextMessage(message);
+            inputField.value = '';
+        }
+    }
+
+    // Add event listeners
+    sendButton.addEventListener('click', sendMessage);
+    inputField.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    // Initialize character
+    convaiClient.initializeCharacter().then(() => {
+        console.log('Convai character initialized successfully');
+        appendMessage('Hello! How can I help you today?', true);
+    }).catch((error) => {
+        console.error('Error initializing Convai character:', error);
+        appendMessage('Sorry, I had trouble connecting. Please try refreshing the page.', true);
+    });
+});
+
 // Three.js Scene Setup
 let scene, camera, renderer, particles;
 let eyeParticles = [];
