@@ -3,9 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Em3rsa - Pioneering the future of 3D AI Agents with cutting-edge technology and innovative solutions">
+    <meta name="keywords" content="3D AI, AI Agents, Virtual Agents, 3D Technology, AI Innovation">
+    <meta property="og:title" content="Em3rsa - 3D AI Agents">
+    <meta property="og:description" content="Exploring the Future of 3D AI Agents">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://maigui.netlify.app/">
+    <meta name="theme-color" content="#000000">
+    
     <title>Em3rsa - 3D AI Agents</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
+    <script src="https://cdn.convai.com/sdk/web-sdk.js"></script>
     <script type="module" src="/js/main.js"></script>
     <style>
         * {
@@ -16,9 +30,17 @@
 
         body {
             overflow-x: hidden;
-            font-family: Arial, sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             background: #000;
             color: #fff;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         canvas {
@@ -99,7 +121,53 @@
             border-radius: 20px;
             margin: 20px;
             padding: 40px;
-            transition: all 0.3s ease;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: sectionFadeIn 1s ease-out forwards;
+        }
+
+        @keyframes sectionFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #ffffff3d;
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .section:hover {
@@ -130,6 +198,33 @@
             opacity: 1;
         }
 
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 30px auto;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .video-container:hover {
+            transform: scale(1.02);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         .placeholder {
             width: 80%;
             height: 400px;
@@ -148,6 +243,80 @@
             top: 20px;
             right: 20px;
             z-index: 1000;
+        }
+
+        #convai-container {
+            width: 400px;
+            height: 400px;
+            margin: 20px auto;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+        }
+
+        .convai-controls {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .convai-output {
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .convai-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        #convai-input {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        #convai-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        #convai-send {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #convai-send:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
         }
     </style>
 </head>
@@ -171,13 +340,47 @@
         <section id="home" class="section">
             <h1>Em3rsa</h1>
             <p>Exploring the Future of 3D AI Agents</p>
-            <div class="placeholder">Image Placeholder</div>
-            <div class="placeholder">Video Placeholder</div>
+            <div class="model-viewer">
+                <div id="canvas-container"></div>
+                <div id="convai-container"></div>
+                <div class="convai-controls">
+                    <div id="convai-output" class="convai-output"></div>
+                    <div class="convai-input-container">
+                        <input type="text" id="convai-input" placeholder="Type your message..." />
+                        <button id="convai-send">Send</button>
+                    </div>
+                </div>
+            </div>
+            <div class="features-grid">
+                <div class="feature">
+                    <h3>Advanced AI</h3>
+                    <p>Cutting-edge artificial intelligence powering our 3D agents</p>
+                </div>
+                <div class="feature">
+                    <h3>Real-time Interaction</h3>
+                    <p>Seamless real-time interaction with AI agents</p>
+                </div>
+                <div class="feature">
+                    <h3>Custom Solutions</h3>
+                    <p>Tailored 3D AI solutions for your specific needs</p>
+                </div>
+            </div>
         </section>
 
         <section id="about" class="section">
             <h2>About Us</h2>
             <p>Learn more about Em3rsa and our mission in the world of 3D AI Agents.</p>
+            <div class="video-container">
+                <iframe 
+                    width="560" 
+                    height="315" 
+                    src="https://www.youtube.com/embed/R3DGNWj0Ilw" 
+                    title="Em3rsa Video"
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
         </section>
 
         <section id="contact" class="section">
