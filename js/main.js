@@ -1,21 +1,35 @@
 import * as THREE from 'three';
 
-// Initialize Convai SDK
-const convaiClient = new window.CONVAI_SDK.ConvaiClient({
-    apiKey: '65bf9ae68038238e590ce2857b7d933b',
-    characterId: '63eba3f89146e9c36c6e5751', // Using a specific character ID
-    enableAudio: true,
-    container: 'convai-container',
-    enableVoiceInput: true,
-    enableTextInput: true,
-    enableTextOutput: true,
-    enableAutoplay: true,
-    enableProfanityFilter: true,
-    language: 'en-US'
-});
-
-// Initialize character with error handling
+// Initialize chat functionality
 document.addEventListener('DOMContentLoaded', () => {
+    let convaiClient;
+
+    // Initialize Convai SDK if available
+    try {
+        if (window.CONVAI_SDK) {
+            convaiClient = new window.CONVAI_SDK.ConvaiClient({
+                apiKey: '65bf9ae68038238e590ce2857b7d933b',
+                characterId: '63eba3f89146e9c36c6e5751',
+                enableAudio: true,
+                container: 'convai-container',
+                enableVoiceInput: true,
+                enableTextInput: true,
+                enableTextOutput: true,
+                enableAutoplay: true,
+                enableProfanityFilter: true,
+                language: 'en-US'
+            });
+        } else {
+            console.warn('Convai SDK not available');
+            document.getElementById('convai-container').innerHTML = '<div class="convai-error">Chat functionality is currently unavailable.</div>';
+            return;
+        }
+    } catch (error) {
+        console.error('Error initializing Convai:', error);
+        document.getElementById('convai-container').innerHTML = '<div class="convai-error">Chat functionality is currently unavailable.</div>';
+        return;
+    }
+
     const outputDiv = document.getElementById('convai-output');
     const inputField = document.getElementById('convai-input');
     const sendButton = document.getElementById('convai-send');
@@ -24,13 +38,37 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendMessage(text, isAI = false) {
         const messageDiv = document.createElement('div');
         messageDiv.className = isAI ? 'ai-message' : 'user-message';
-        messageDiv.style.marginBottom = '10px';
-        messageDiv.style.padding = '8px 12px';
-        messageDiv.style.borderRadius = '6px';
-        messageDiv.style.background = isAI ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.3)';
-        messageDiv.textContent = text;
+        
+        // Message text
+        const textSpan = document.createElement('span');
+        textSpan.textContent = text;
+        messageDiv.appendChild(textSpan);
+        
+        // Timestamp
+        const timeSpan = document.createElement('div');
+        timeSpan.className = 'message-time';
+        const now = new Date();
+        timeSpan.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        messageDiv.appendChild(timeSpan);
+        
         outputDiv.appendChild(messageDiv);
-        outputDiv.scrollTop = outputDiv.scrollHeight;
+        
+        // Smooth scroll to bottom
+        outputDiv.scrollTo({
+            top: outputDiv.scrollHeight,
+            behavior: 'smooth'
+        });
+        
+        // Add fade-in animation
+        messageDiv.style.opacity = '0';
+        messageDiv.style.transform = 'translateY(10px)';
+        messageDiv.style.transition = 'all 0.3s ease';
+        
+        // Trigger animation
+        setTimeout(() => {
+            messageDiv.style.opacity = '1';
+            messageDiv.style.transform = 'translateY(0)';
+        }, 50);
     }
 
     // Set up response callback
@@ -113,9 +151,10 @@ function init() {
             originalX: x,
             originalY: y,
             originalZ: z,
-            randomX: (Math.random() - 0.5) * 10,
-            randomY: (Math.random() - 0.5) * 10,
-            randomZ: (Math.random() - 0.5) * 10
+            randomX: (Math.random() - 0.5) * 15,
+            randomY: (Math.random() - 0.5) * 15,
+            randomZ: (Math.random() - 0.5) * 8,
+            phase: Math.random() * Math.PI * 2 // Add phase for varied movement
         });
     }
 
@@ -123,13 +162,14 @@ function init() {
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-        size: 0.02,
+        size: 0.03,
         vertexColors: true,
         transparent: true,
         sizeAttenuation: true,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
-        depthTest: false
+        depthTest: false,
+        opacity: 0.8
     });
 
     particles = new THREE.Points(geometry, material);
@@ -172,21 +212,28 @@ function animate(time) {
     for (let i = 0; i < particleCount; i++) {
         const particle = eyeParticles[i];
         
-        // Calculate distance from mouse
-        const dx = targetX * 2;
-        const dy = targetY * 2;
+        // Calculate distance from mouse with enhanced sensitivity
+        const dx = targetX * 3; // Increased mouse influence
+        const dy = targetY * 3;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // Scatter effect based on mouse proximity
+        // Enhanced scatter effect based on mouse proximity
         let x = particle.originalX;
         let y = particle.originalY;
         let z = particle.originalZ;
         
-        if (distance < 1.5) {
-            const scatter = (1.5 - distance) * 2;
-            x += particle.randomX * scatter;
-            y += particle.randomY * scatter;
+        if (distance < 2.5) { // Further increased scatter radius
+            const scatter = Math.pow((2.5 - distance), 2) * 2.0; // Enhanced non-linear scatter effect
+            const time_factor = Math.sin(time * 0.001 + i) * 0.3; // Add some wave motion
+            x += particle.randomX * scatter + time_factor;
+            y += particle.randomY * scatter + time_factor;
             z += particle.randomZ * scatter;
+        } else {
+            // Smooth return to original position
+            const returnSpeed = 0.05;
+            x += (particle.originalX - x) * returnSpeed;
+            y += (particle.originalY - y) * returnSpeed;
+            z += (particle.originalZ - z) * returnSpeed;
         }
 
         positions.push(x, y, z);
