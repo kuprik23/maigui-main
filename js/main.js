@@ -124,9 +124,14 @@ let targetX = 0, targetY = 0;
 function init() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer = new THREE.WebGLRenderer({ 
+        antialias: true, 
+        alpha: true,
+        powerPreference: "high-performance"
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
 
     // Create particles for the eye
     const geometry = new THREE.BufferGeometry();
@@ -176,7 +181,11 @@ function init() {
     particles.rotation.x = Math.PI * 0.1; // Slight tilt
     scene.add(particles);
 
-    camera.position.z = 4;
+    camera.position.z = 5;
+    
+    // Center the particles
+    particles.position.x = 0;
+    particles.position.y = 0;
 
     // Event Listeners
     window.addEventListener('mousemove', onMouseMove);
@@ -254,9 +263,85 @@ function animate(time) {
 }
 
 // Menu functionality
-document.getElementById('menu-btn').addEventListener('click', () => {
-    document.getElementById('menu').classList.toggle('active');
-});
+function initializeMenu() {
+    const menuBtn = document.getElementById('menu-btn');
+    const menu = document.getElementById('menu');
+    const spans = menuBtn.getElementsByTagName('span');
+
+    // Add transition styles to spans
+    spans[0].style.transition = 'transform 0.3s ease-in-out';
+    spans[1].style.transition = 'opacity 0.3s ease-in-out';
+    spans[2].style.transition = 'transform 0.3s ease-in-out';
+
+    menuBtn.addEventListener('click', function() {
+        menu.classList.toggle('active');
+        this.classList.toggle('active');
+        
+        if (menu.classList.contains('active')) {
+            // Animate to X
+            spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+            spans[1].style.opacity = '0';
+            spans[2].style.transform = 'rotate(-45deg) translate(7px, -7px)';
+            
+            // Add overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'menu-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.background = 'rgba(0, 0, 0, 0.5)';
+            overlay.style.zIndex = '998';
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.3s ease';
+            document.body.appendChild(overlay);
+            
+            // Trigger overlay fade in
+            setTimeout(() => overlay.style.opacity = '1', 0);
+            
+            // Close menu when clicking overlay
+            overlay.addEventListener('click', function() {
+                menu.classList.remove('active');
+                menuBtn.classList.remove('active');
+                spans[0].style.transform = 'none';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = 'none';
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 300);
+            });
+        } else {
+            // Reset to hamburger
+            spans[0].style.transform = 'none';
+            spans[1].style.opacity = '1';
+            spans[2].style.transform = 'none';
+            
+            // Remove overlay
+            const overlay = document.getElementById('menu-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 300);
+            }
+        }
+    });
+
+    // Close menu when clicking menu items
+    menu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            menu.classList.remove('active');
+            menuBtn.classList.remove('active');
+            spans[0].style.transform = 'none';
+            spans[1].style.opacity = '1';
+            spans[2].style.transform = 'none';
+            
+            const overlay = document.getElementById('menu-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 300);
+            }
+        });
+    });
+}
 
 // Smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -279,6 +364,9 @@ window.onSignIn = function(googleUser) {
     // Here you would typically send the user info to your backend
 };
 
-// Initialize Three.js scene
-init();
-animate();
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeMenu();
+    init(); // Initialize Three.js scene
+    animate();
+});
