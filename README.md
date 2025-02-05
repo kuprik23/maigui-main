@@ -1,11 +1,19 @@
 # Em3rsa - 3D AI Agents Website
 
-An interactive website showcasing Em3rsa's work in 3D AI Agents, featuring a dynamic Three.js particle eye animation.
+An interactive website showcasing Em3rsa's work in 3D AI Agents, featuring a dynamic Three.js particle eye animation and AI chat functionality.
 
 ## Features
 
-- Interactive particle eye animation that responds to mouse movement
-- Dynamic color transitions and particle scatter effects
+- Interactive particle eye animation with advanced effects:
+  - Dynamic scatter effect on hover with non-linear movement
+  - Smooth return-to-position behavior
+  - Wave motion for organic particle movement
+  - Enhanced color transitions and particle visibility
+- AI Chat Integration:
+  - Real-time conversation with AI assistant
+  - Stylish message bubbles with timestamps
+  - Smooth animations and transitions
+  - Graceful error handling for SDK availability
 - Responsive design with mobile-friendly navigation
 - Google authentication integration
 - Smooth scrolling sections for content
@@ -13,7 +21,8 @@ An interactive website showcasing Em3rsa's work in 3D AI Agents, featuring a dyn
 
 ## Technologies Used
 
-- Three.js for 3D graphics and animations
+- Three.js for 3D graphics and particle animations
+- Convai SDK for AI chat functionality
 - Vite for development and building
 - ES Modules for modern JavaScript
 - Google OAuth for authentication
@@ -48,12 +57,28 @@ npm run build
 ```
 em3rsa/
 ├── js/
-│   └── main.js         # Three.js implementation and main logic
-├── index.html          # Main HTML file
+│   └── main.js         # Three.js implementation, chat functionality, and main logic
+├── index.html          # Main HTML file with styles and structure
 ├── package.json        # Project dependencies and scripts
 ├── vite.config.js      # Vite configuration
 └── README.md          # Project documentation
 ```
+
+## Features in Detail
+
+### Three.js Particle Animation
+- Dynamic particle system creating an eye shape
+- Interactive scatter effect on mouse hover
+- Non-linear movement patterns for organic feel
+- Smooth transitions and color changes
+- Independent operation from other features
+
+### AI Chat Integration
+- Real-time conversation capabilities
+- Elegant UI with distinct message bubbles
+- Timestamp display for messages
+- Smooth scrolling and fade-in animations
+- Graceful fallback for SDK unavailability
 
 ## Contributing
 
