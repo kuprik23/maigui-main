@@ -1,117 +1,5 @@
 import * as THREE from 'three';
 
-// Initialize chat functionality
-async function initializeChat() {
-    let convaiClient;
-    
-    if (!window.CONVAI_SDK) {
-        console.warn('Convai SDK not available');
-        document.getElementById('convai-container').innerHTML = '<div class="convai-error">Chat functionality is currently unavailable.</div>';
-        return;
-    }
-
-    try {
-        convaiClient = new window.CONVAI_SDK.ConvaiClient({
-            apiKey: '65bf9ae68038238e590ce2857b7d933b',
-            characterId: '63eba3f89146e9c36c6e5751',
-            enableAudio: true,
-            container: 'convai-container',
-            enableVoiceInput: true,
-            enableTextInput: true,
-            enableTextOutput: true,
-            enableAutoplay: true,
-            enableProfanityFilter: true,
-            language: 'en-US'
-        });
-    } catch (error) {
-        console.error('Error initializing Convai:', error);
-        document.getElementById('convai-container').innerHTML = '<div class="convai-error">Chat functionality is currently unavailable.</div>';
-        return;
-    }
-
-    const outputDiv = document.getElementById('convai-output');
-    const inputField = document.getElementById('convai-input');
-    const sendButton = document.getElementById('convai-send');
-
-    // Helper function to append messages to output
-    function appendMessage(text, isAI = false) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = isAI ? 'ai-message' : 'user-message';
-        
-        // Message text
-        const textSpan = document.createElement('span');
-        textSpan.textContent = text;
-        messageDiv.appendChild(textSpan);
-        
-        // Timestamp
-        const timeSpan = document.createElement('div');
-        timeSpan.className = 'message-time';
-        const now = new Date();
-        timeSpan.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        messageDiv.appendChild(timeSpan);
-        
-        outputDiv.appendChild(messageDiv);
-        
-        // Smooth scroll to bottom
-        outputDiv.scrollTo({
-            top: outputDiv.scrollHeight,
-            behavior: 'smooth'
-        });
-        
-        // Add fade-in animation
-        messageDiv.style.opacity = '0';
-        messageDiv.style.transform = 'translateY(10px)';
-        messageDiv.style.transition = 'all 0.3s ease';
-        
-        // Trigger animation
-        setTimeout(() => {
-            messageDiv.style.opacity = '1';
-            messageDiv.style.transform = 'translateY(0)';
-        }, 50);
-    }
-
-    // Set up response callback
-    convaiClient.setResponseCallback((response) => {
-        console.log('AI Response:', response);
-        if (response && response.text) {
-            appendMessage(response.text, true);
-        }
-    });
-
-    // Set up error callback
-    convaiClient.setErrorCallback((error) => {
-        console.error('Convai Error:', error);
-        appendMessage('Sorry, there was an error processing your request.', true);
-    });
-
-    // Handle send button click
-    function sendMessage() {
-        const message = inputField.value.trim();
-        if (message) {
-            appendMessage(message, false);
-            convaiClient.sendTextMessage(message);
-            inputField.value = '';
-        }
-    }
-
-    // Add event listeners
-    sendButton.addEventListener('click', sendMessage);
-    inputField.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-
-    try {
-        await convaiClient.initializeCharacter();
-        console.log('Convai character initialized successfully');
-        appendMessage('Hello! How can I help you today?', true);
-    } catch (error) {
-        console.error('Error initializing Convai character:', error);
-        appendMessage('Sorry, I had trouble connecting. Please try refreshing the page.', true);
-    }
-}
-
 // Three.js Scene Setup
 let scene, camera, renderer, logo;
 let mouseX = 0, mouseY = 0;
@@ -391,7 +279,6 @@ function initializeApp() {
         initializeMenu();
         init(); // Initialize Three.js scene
         animate();
-        initializeChat(); // Initialize chat functionality
         console.log('App initialization complete');
     } catch (error) {
         console.error('Error during app initialization:', error);

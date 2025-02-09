@@ -19,7 +19,6 @@
     
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
-    <script src="https://cdn.convai.com/sdk/web-sdk.js"></script>
     <script type="module" src="js/main.js"></script>
     <style>
         * {
@@ -322,148 +321,6 @@
             z-index: 1000;
         }
 
-        .convai-window {
-            width: 400px;
-            height: 500px;
-            margin: 20px auto;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .convai-header {
-            padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .convai-header h3 {
-            margin: 0;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .convai-output {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.2);
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
-            line-height: 1.5;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .user-message, .ai-message {
-            max-width: 85%;
-            padding: 10px 15px;
-            border-radius: 12px;
-            word-wrap: break-word;
-        }
-
-        .user-message {
-            align-self: flex-end;
-            background: rgba(255, 255, 255, 0.1);
-            margin-left: 15%;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        .ai-message {
-            align-self: flex-start;
-            background: rgba(0, 0, 0, 0.3);
-            margin-right: 15%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .message-time {
-            font-size: 0.8em;
-            opacity: 0.6;
-            margin-top: 4px;
-        }
-
-        .convai-error {
-            padding: 20px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid rgba(255, 0, 0, 0.2);
-            border-radius: 8px;
-            margin: 20px;
-            font-size: 14px;
-            backdrop-filter: blur(5px);
-        }
-
-        .convai-output::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .convai-output::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .convai-output::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
-
-        .convai-controls {
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .convai-input-container {
-            display: flex;
-            gap: 10px;
-        }
-
-        #convai-input {
-            flex: 1;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            color: white;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        #convai-input:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        #convai-send {
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            color: white;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        #convai-send:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-        }
-
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -526,20 +383,6 @@
             
             <div id="canvas-container"></div>
 
-            <div class="model-viewer">
-                <div id="convai-container" class="convai-window">
-                    <div class="convai-header">
-                        <h3>AI Assistant</h3>
-                    </div>
-                    <div id="convai-output" class="convai-output"></div>
-                    <div class="convai-controls">
-                        <div class="convai-input-container">
-                            <input type="text" id="convai-input" placeholder="Type your message..." />
-                            <button id="convai-send">Send</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="features-grid">
                 <div class="feature">
                     <h3>Advanced AI</h3>
