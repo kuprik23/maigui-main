@@ -113,14 +113,15 @@ async function initializeChat() {
 }
 
 // Three.js Scene Setup
-let scene, camera, renderer, particles;
-let eyeParticles = [];
-const particleCount = 2000;
+let scene, camera, renderer, logo;
 let mouseX = 0, mouseY = 0;
-let targetX = 0, targetY = 0;
+let targetRotationX = 0, targetRotationY = 0;
+let scrollProgress = 0;
+let isMobile = window.innerWidth <= 768;
 
 // Initialize Three.js scene
 function init() {
+    // Scene setup
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({ 
@@ -132,71 +133,114 @@ function init() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-    // Create particles for the eye
-    const geometry = new THREE.BufferGeometry();
-    const positions = [];
-    const colors = [];
+    // Add lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
 
-    for (let i = 0; i < particleCount; i++) {
-        // Create eye shape using parametric equations
-        const t = (i / particleCount) * Math.PI * 2;
-        const radius = 1.5;
-        const x = Math.cos(t) * radius;
-        const y = Math.sin(t) * radius * 0.6; // Make it slightly oval
-        const z = 0;
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5);
+    scene.add(directionalLight);
 
-        positions.push(x, y, z);
-        
-        // Random colors for particles
-        colors.push(Math.random(), Math.random(), Math.random());
-        
-        // Store original positions for animation
-        eyeParticles.push({
-            originalX: x,
-            originalY: y,
-            originalZ: z,
-            randomX: (Math.random() - 0.5) * 15,
-            randomY: (Math.random() - 0.5) * 15,
-            randomZ: (Math.random() - 0.5) * 8,
-            phase: Math.random() * Math.PI * 2 // Add phase for varied movement
-        });
-    }
+    // Create logo geometry
+    const triangleShape = new THREE.Shape();
+    triangleShape.moveTo(0, 2);
+    triangleShape.lineTo(-1.7, -1);
+    triangleShape.lineTo(1.7, -1);
+    triangleShape.lineTo(0, 2);
 
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    const extrudeSettings = {
+        steps: 1,
+        depth: 0.4,
+        bevelEnabled: true,
+        bevelThickness: 0.2,
+        bevelSize: 0.1,
+        bevelSegments: 3
+    };
 
-    const material = new THREE.PointsMaterial({
-        size: 0.03,
-        vertexColors: true,
-        transparent: true,
-        sizeAttenuation: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        depthTest: false,
-        opacity: 0.8
+    const geometry = new THREE.ExtrudeGeometry(triangleShape, extrudeSettings);
+
+    // Create custom shader material
+    const material = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            color: { value: new THREE.Color(0xFFD700) }
+        },
+        vertexShader: `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            
+            void main() {
+                vNormal = normalize(normalMatrix * normal);
+                vPosition = position;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `,
+        fragmentShader: `
+            uniform float time;
+            uniform vec3 color;
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            
+            void main() {
+                vec3 light = normalize(vec3(1.0, 1.0, 1.0));
+                float fresnel = pow(1.0 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
+                float diffuse = max(0.0, dot(vNormal, light));
+                vec3 baseColor = color;
+                vec3 finalColor = mix(baseColor, vec3(1.0), fresnel * 0.7);
+                finalColor *= (diffuse * 0.8 + 0.2);
+                finalColor += vec3(pow(fresnel, 2.0)) * 0.5;
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `
     });
 
-    particles = new THREE.Points(geometry, material);
-    particles.rotation.x = Math.PI * 0.1; // Slight tilt
-    scene.add(particles);
+    // Create logo mesh
+    logo = new THREE.Mesh(geometry, material);
+    logo.scale.set(0.8, 0.8, 0.8);
+    scene.add(logo);
 
+    // Position camera
     camera.position.z = 5;
-    
-    // Center the particles
-    particles.position.x = 0;
-    particles.position.y = 0;
 
     // Event Listeners
     window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('scroll', onScroll);
     window.addEventListener('resize', onWindowResize);
+    
+    // Device orientation for mobile
+    if (isMobile && window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', onDeviceOrientation);
+    }
 }
 
 function onMouseMove(event) {
+    if (isMobile) return;
     mouseX = (event.clientX / window.innerWidth) * 2 - 1;
     mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
+function onTouchMove(event) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    mouseX = (touch.clientX / window.innerWidth) * 2 - 1;
+    mouseY = -(touch.clientY / window.innerHeight) * 2 + 1;
+}
+
+function onDeviceOrientation(event) {
+    if (event.beta && event.gamma) {
+        mouseX = Math.min(Math.max(event.gamma / 45, -1), 1);
+        mouseY = Math.min(Math.max(event.beta / 45, -1), 1);
+    }
+}
+
+function onScroll() {
+    const scrollMax = document.documentElement.scrollHeight - window.innerHeight;
+    scrollProgress = window.scrollY / scrollMax;
+}
+
 function onWindowResize() {
+    isMobile = window.innerWidth <= 768;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -205,59 +249,26 @@ function onWindowResize() {
 function animate(time) {
     requestAnimationFrame(animate);
 
-    // Rotate particles slowly
-    if (particles) {
-        particles.rotation.z = Math.sin(time * 0.0001) * 0.1;
+    if (logo) {
+        // Update shader time uniform
+        logo.material.uniforms.time.value = time * 0.001;
+
+        // Smooth rotation based on mouse position
+        const rotationSpeed = isMobile ? 0.03 : 0.05;
+        targetRotationY += (mouseX * 1.5 - targetRotationY) * rotationSpeed;
+        targetRotationX += (mouseY * 1.5 - targetRotationX) * rotationSpeed;
+
+        // Apply rotations
+        logo.rotation.y = targetRotationY;
+        logo.rotation.x = targetRotationX;
+
+        // Add scroll-based rotation
+        logo.rotation.z = scrollProgress * Math.PI * 2;
+
+        // Add floating animation
+        logo.position.y = Math.sin(time * 0.001) * 0.1;
     }
 
-    // Smooth mouse movement
-    targetX += (mouseX - targetX) * 0.1;
-    targetY += (mouseY - targetY) * 0.1;
-
-    const positions = [];
-    const colors = [];
-
-    for (let i = 0; i < particleCount; i++) {
-        const particle = eyeParticles[i];
-        
-        // Calculate distance from mouse with enhanced sensitivity
-        const dx = targetX * 3; // Increased mouse influence
-        const dy = targetY * 3;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        // Enhanced scatter effect based on mouse proximity
-        let x = particle.originalX;
-        let y = particle.originalY;
-        let z = particle.originalZ;
-        
-        if (distance < 2.5) { // Further increased scatter radius
-            const scatter = Math.pow((2.5 - distance), 2) * 2.0; // Enhanced non-linear scatter effect
-            const time_factor = Math.sin(time * 0.001 + i) * 0.3; // Add some wave motion
-            x += particle.randomX * scatter + time_factor;
-            y += particle.randomY * scatter + time_factor;
-            z += particle.randomZ * scatter;
-        } else {
-            // Smooth return to original position
-            const returnSpeed = 0.05;
-            x += (particle.originalX - x) * returnSpeed;
-            y += (particle.originalY - y) * returnSpeed;
-            z += (particle.originalZ - z) * returnSpeed;
-        }
-
-        positions.push(x, y, z);
-        
-        // More vibrant color changes with time-based animation
-        const r = 0.7 + Math.sin(time * 0.001 + i * 0.1) * 0.3;
-        const g = 0.7 + Math.cos(time * 0.001 + i * 0.1) * 0.3;
-        const b = 0.7 + Math.sin(time * 0.002 + i * 0.1) * 0.3;
-        colors.push(r, g, b);
-    }
-
-    // Update geometry
-    const geometry = particles.geometry;
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    
     renderer.render(scene, camera);
 }
 
