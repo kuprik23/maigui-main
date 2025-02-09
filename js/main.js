@@ -1,29 +1,28 @@
 import * as THREE from 'three';
 
 // Initialize chat functionality
-document.addEventListener('DOMContentLoaded', () => {
+async function initializeChat() {
     let convaiClient;
+    
+    if (!window.CONVAI_SDK) {
+        console.warn('Convai SDK not available');
+        document.getElementById('convai-container').innerHTML = '<div class="convai-error">Chat functionality is currently unavailable.</div>';
+        return;
+    }
 
-    // Initialize Convai SDK if available
     try {
-        if (window.CONVAI_SDK) {
-            convaiClient = new window.CONVAI_SDK.ConvaiClient({
-                apiKey: '65bf9ae68038238e590ce2857b7d933b',
-                characterId: '63eba3f89146e9c36c6e5751',
-                enableAudio: true,
-                container: 'convai-container',
-                enableVoiceInput: true,
-                enableTextInput: true,
-                enableTextOutput: true,
-                enableAutoplay: true,
-                enableProfanityFilter: true,
-                language: 'en-US'
-            });
-        } else {
-            console.warn('Convai SDK not available');
-            document.getElementById('convai-container').innerHTML = '<div class="convai-error">Chat functionality is currently unavailable.</div>';
-            return;
-        }
+        convaiClient = new window.CONVAI_SDK.ConvaiClient({
+            apiKey: '65bf9ae68038238e590ce2857b7d933b',
+            characterId: '63eba3f89146e9c36c6e5751',
+            enableAudio: true,
+            container: 'convai-container',
+            enableVoiceInput: true,
+            enableTextInput: true,
+            enableTextOutput: true,
+            enableAutoplay: true,
+            enableProfanityFilter: true,
+            language: 'en-US'
+        });
     } catch (error) {
         console.error('Error initializing Convai:', error);
         document.getElementById('convai-container').innerHTML = '<div class="convai-error">Chat functionality is currently unavailable.</div>';
@@ -103,15 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initialize character
-    convaiClient.initializeCharacter().then(() => {
+    try {
+        await convaiClient.initializeCharacter();
         console.log('Convai character initialized successfully');
         appendMessage('Hello! How can I help you today?', true);
-    }).catch((error) => {
+    } catch (error) {
         console.error('Error initializing Convai character:', error);
         appendMessage('Sorry, I had trouble connecting. Please try refreshing the page.', true);
-    });
-});
+    }
+}
 
 // Three.js Scene Setup
 let scene, camera, renderer, particles;
@@ -264,14 +263,24 @@ function animate(time) {
 
 // Menu functionality
 function initializeMenu() {
+    console.log('Initializing menu...');
     const menuBtn = document.getElementById('menu-btn');
     const menu = document.getElementById('menu');
+
+    if (!menuBtn || !menu) {
+        console.error('Menu elements not found:', { menuBtn, menu });
+        return;
+    }
+
+    console.log('Menu elements found:', { menuBtn, menu });
     const spans = menuBtn.getElementsByTagName('span');
+    console.log('Menu spans found:', spans.length);
 
     // Add transition styles to spans
-    spans[0].style.transition = 'transform 0.3s ease-in-out';
-    spans[1].style.transition = 'opacity 0.3s ease-in-out';
-    spans[2].style.transition = 'transform 0.3s ease-in-out';
+    Array.from(spans).forEach((span, index) => {
+        span.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
+        console.log(`Added transition to span ${index}`);
+    });
 
     menuBtn.addEventListener('click', function() {
         menu.classList.toggle('active');
@@ -364,9 +373,22 @@ window.onSignIn = function(googleUser) {
     // Here you would typically send the user info to your backend
 };
 
-// Initialize everything when DOM is loaded
+// Wait for DOM to be fully loaded before initializing
+function initializeApp() {
+    console.log('Initializing app...');
+    try {
+        initializeMenu();
+        init(); // Initialize Three.js scene
+        animate();
+        initializeChat(); // Initialize chat functionality
+        console.log('App initialization complete');
+    } catch (error) {
+        console.error('Error during app initialization:', error);
+    }
+}
+
+// Ensure DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    initializeMenu();
-    init(); // Initialize Three.js scene
-    animate();
+    console.log('DOM content loaded');
+    initializeApp();
 });

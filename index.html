@@ -20,19 +20,7 @@
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
     <script src="https://cdn.convai.com/sdk/web-sdk.js"></script>
-    <script>
-        // Ensure Convai SDK is loaded before main.js
-        window.addEventListener('load', function() {
-            if (window.CONVAI_SDK) {
-                const script = document.createElement('script');
-                script.type = 'module';
-                script.src = 'js/main.js';
-                document.body.appendChild(script);
-            } else {
-                console.error('Convai SDK failed to load');
-            }
-        });
-    </script>
+    <script type="module" src="js/main.js"></script>
     <style>
         * {
             margin: 0;
