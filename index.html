@@ -55,6 +55,54 @@
             z-index: -1;
         }
 
+        /* 3D Image Styles */
+        .image-3d-container {
+            width: 300px;
+            height: 300px;
+            perspective: 1000px;
+            margin: 2rem auto;
+        }
+
+        .image-3d-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .image-3d-container:hover .image-3d-card {
+            transform: rotateY(180deg);
+        }
+
+        .image-3d-front,
+        .image-3d-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .image-3d-back {
+            transform: rotateY(180deg);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .image-3d-front img,
+        .image-3d-back img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-3d-back img {
+            filter: hue-rotate(180deg) contrast(1.2);
+        }
+
         @keyframes pulseEffect {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -256,7 +304,7 @@
             width: 100%;
             max-width: 800px;
             margin: 30px auto;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
             border-radius: 15px;
@@ -499,6 +547,18 @@
         <section id="home" class="section">
             <h1 style="font-size: 4rem; margin-bottom: 1rem; background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none;">Em3rsa</h1>
             <p style="font-size: 1.5rem; margin-bottom: 2rem; color: rgba(255, 255, 255, 0.9);">Exploring the Future of 3D AI Agents</p>
+            
+            <div class="image-3d-container">
+                <div class="image-3d-card">
+                    <div class="image-3d-front">
+                        <img src="images/eye.jpg" alt="AI Eye" />
+                    </div>
+                    <div class="image-3d-back">
+                        <img src="images/eye.jpg" alt="AI Eye" />
+                    </div>
+                </div>
+            </div>
+
             <div class="model-viewer">
                 <div id="canvas-container"></div>
                 <div id="convai-container" class="convai-window">
