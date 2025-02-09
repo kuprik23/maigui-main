@@ -1,13 +1,17 @@
 import { defineConfig } from 'vite';
-import basicSsl from '@vitejs/plugin-basic-ssl';
+import legacy from '@vitejs/plugin-legacy';
 
 export default defineConfig({
+  base: '',
   server: {
-    https: true,
     open: true,
     host: true
   },
-  plugins: [basicSsl()],
+  plugins: [
+    legacy({
+      targets: ['defaults', 'not IE 11']
+    })
+  ],
   resolve: {
     alias: {
       'three': 'three/build/three.module.js'
@@ -18,6 +22,7 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    target: 'esnext',
     rollupOptions: {
       output: {
         manualChunks: {

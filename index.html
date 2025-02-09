@@ -17,8 +17,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
-    <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
     <script type="module" src="js/main.js"></script>
     <style>
         * {
@@ -33,7 +31,7 @@
             left: 0;
             width: 100%;
             height: 100vh;
-            background: url('/eye.jpg') center/cover no-repeat;
+            background: url('/images/eye.jpg') center/cover no-repeat;
             filter: brightness(0.7) saturate(1.2);
             z-index: -2;
             animation: pulseEffect 15s ease-in-out infinite;
@@ -371,10 +369,6 @@
         <a href="#about">About</a>
         <a href="#contact">Contact</a>
     </nav>
-
-    <div class="auth-section">
-        <div class="g-signin2" data-onsuccess="onSignIn"></div>
-    </div>
 
     <div class="content">
         <section id="home" class="section">
