@@ -1,7 +1,11 @@
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshyAPI } from '@meshy/sdk';
 
 // Three.js Scene Setup
-let scene, camera, renderer, particles;
+let scene, camera, renderer, model;
+const MESHY_API_KEY = 'msy_VSMMtZKsokyKMkyex1MnVMIQrOAqhHt9K8Xa';
+const meshy = new MeshyAPI(MESHY_API_KEY);
 let mouseX = 0, mouseY = 0;
 let targetRotationX = 0, targetRotationY = 0;
 let scrollProgress = 0;
@@ -30,21 +34,14 @@ function init() {
         directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
 
-        // Load image and create texture
-        const loader = new THREE.TextureLoader();
-        loader.load('./eye.jpg', 
-            // onLoad callback
-            function(texture) {
-                createParticles(texture);
-            },
-            // onProgress callback
-            undefined,
-            // onError callback
-            function(err) {
-                console.error('Error loading texture:', err);
-                console.error('Current working directory:', window.location.href);
-            }
-        );
+        // Create loading indicator
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.innerHTML = '<div class="loader"></div>';
+        document.body.appendChild(loadingOverlay);
+
+        // Generate and load 3D model
+        generateAndLoadModel();
 
         // Position camera
         camera.position.z = 5;
@@ -64,86 +61,41 @@ function init() {
     }
 }
 
-function createParticles(texture) {
+async function generateAndLoadModel() {
     try {
-        // Create particle geometry
-        const width = isMobile ? 50 : 100;
-        const height = isMobile ? 50 : 100;
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(width * height * 3);
-        const uvs = new Float32Array(width * height * 2);
-
-        for (let i = 0; i < width * height; i++) {
-            const x = (i % width) / width;
-            const y = Math.floor(i / width) / height;
-            
-            // Positions
-            positions[i * 3] = x * 2 - 1;
-            positions[i * 3 + 1] = y * 2 - 1;
-            positions[i * 3 + 2] = 0;
-            
-            // UVs
-            uvs[i * 2] = x;
-            uvs[i * 2 + 1] = y;
-        }
-
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-
-        // Create custom shader material
-        const material = new THREE.ShaderMaterial({
-            uniforms: {
-                uTexture: { value: texture },
-                uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-                uTime: { value: 0 },
-                uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-                uSnapStrength: { value: isMobile ? 0.05 : 0.1 }
-            },
-            vertexShader: `
-                uniform vec2 uMouse;
-                uniform float uTime;
-                uniform vec2 uResolution;
-                uniform float uSnapStrength;
-                varying vec2 vUv;
-
-                void main() {
-                    vUv = uv;
-                    vec3 pos = position;
-
-                    // Displace vertices based on mouse position
-                    float dist = distance(uv, uMouse);
-                    float proximity = 1.0 - smoothstep(0.0, 0.5, dist);
-                    float distThreshold = ${isMobile ? '0.3' : '0.2'};
-                    float distortion = sin(dist * 10.0 - uTime * 0.5) * 0.1 * smoothstep(distThreshold, 0.0, dist);
-                    pos.z += distortion * proximity;
-
-                    // Snap back to original position when mouse is far
-                    pos.z += (1.0 - proximity) * uSnapStrength;
-
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-                    gl_PointSize = ${isMobile ? '2.0' : '3.0'};
-                }
-            `,
-            fragmentShader: `
-                uniform sampler2D uTexture;
-                varying vec2 vUv;
-
-                void main() {
-                    vec4 texel = texture2D(uTexture, vUv);
-                    gl_FragColor = texel;
-                }
-            `,
-            transparent: true,
-            depthWrite: false,
-            depthTest: true
+        // Generate 3D model using Meshy
+        const prompt = "A futuristic AI brain, highly detailed, cybernetic, glowing with energy";
+        const response = await meshy.generateModel({
+            prompt: prompt,
+            style: "realistic",
+            format: "glb"
         });
 
-        // Create particle mesh
-        particles = new THREE.Points(geometry, material);
-        scene.add(particles);
+        // Load the generated model
+        const loader = new GLTFLoader();
+        const gltf = await loader.loadAsync(response.modelUrl);
+        
+        model = gltf.scene;
+        model.scale.set(2, 2, 2);
+        model.position.set(0, 0, 0);
+        scene.add(model);
+
+        // Add rotation animation
+        model.rotation.y = Math.PI / 4;
+
+        // Remove loading overlay
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.add('hidden');
+            setTimeout(() => loadingOverlay.remove(), 500);
+        }
 
     } catch (error) {
-        console.error('Error in createParticles:', error);
+        console.error('Error generating/loading model:', error);
+        const loadingOverlay = document.querySelector('.loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.innerHTML = '<p style="color: white;">Error loading 3D model. Please try again.</p>';
+        }
     }
 }
 
@@ -185,11 +137,12 @@ function onWindowResize() {
 function animate(time) {
     requestAnimationFrame(animate);
 
-    if (particles && particles.material.uniforms) {
-        // Update shader uniforms
-        particles.material.uniforms.uTime.value = time * 0.001;
-        particles.material.uniforms.uMouse.value.set((mouseX + 1) / 2, (mouseY + 1) / 2);
-        particles.material.uniforms.uSnapStrength.value = isMobile ? 0.05 : 0.1;
+    if (model) {
+        // Rotate model
+        model.rotation.y += 0.005;
+        
+        // Add floating animation
+        model.position.y = Math.sin(time * 0.001) * 0.1;
     }
 
     renderer.render(scene, camera);
