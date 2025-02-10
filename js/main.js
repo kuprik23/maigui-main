@@ -32,7 +32,7 @@ function init() {
 
         // Load image and create texture
         const loader = new THREE.TextureLoader();
-        loader.load('images/eye.jpg', 
+        loader.load('./eye.jpg', 
             // onLoad callback
             function(texture) {
                 createParticles(texture);
@@ -42,6 +42,7 @@ function init() {
             // onError callback
             function(err) {
                 console.error('Error loading texture:', err);
+                console.error('Current working directory:', window.location.href);
             }
         );
 
