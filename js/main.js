@@ -29,63 +29,74 @@ function init() {
     directionalLight.position.set(5, 5, 5);
     scene.add(directionalLight);
 
-    // Create logo geometry
-    const triangleShape = new THREE.Shape();
-    triangleShape.moveTo(0, 2);
-    triangleShape.lineTo(-1.7, -1);
-    triangleShape.lineTo(1.7, -1);
-    triangleShape.lineTo(0, 2);
+    // Load image and create texture
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load('images/eye.jpg');
 
-    const extrudeSettings = {
-        steps: 1,
-        depth: 0.4,
-        bevelEnabled: true,
-        bevelThickness: 0.2,
-        bevelSize: 0.1,
-        bevelSegments: 3
-    };
+    // Create particle geometry
+    const width = 100;
+    const height = 100;
+    const size = isMobile ? 0.005 : 0.01;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(width * height * 3);
 
-    const geometry = new THREE.ExtrudeGeometry(triangleShape, extrudeSettings);
+    for (let i = 0; i < width * height; i++) {
+        const x = (i % width) / width;
+        const y = Math.floor(i / width) / height;
+        positions[i * 3] = x * 2 - 1;
+        positions[i * 3 + 1] = y * 2 - 1;
+        positions[i * 3 + 2] = 0;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
     // Create custom shader material
     const material = new THREE.ShaderMaterial({
         uniforms: {
-            time: { value: 0 },
-            color: { value: new THREE.Color(0xFFD700) }
+            uTexture: { value: texture },
+            uMouse: { value: new THREE.Vector2() },
+            uTime: { value: 0 },
+            uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
         },
         vertexShader: `
-            varying vec3 vNormal;
-            varying vec3 vPosition;
-            
+            uniform vec2 uMouse;
+            uniform float uTime;
+            uniform vec2 uResolution;
+            uniform float uSnapStrength;
+            varying vec2 vUv;
+
             void main() {
-                vNormal = normalize(normalMatrix * normal);
-                vPosition = position;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                vUv = uv;
+                vec3 pos = position;
+
+                // Displace vertices based on mouse position
+                float dist = distance(uv, uMouse);
+                float proximity = 1.0 - smoothstep(0.0, 0.5, dist);
+                float distThreshold = isMobile ? 0.3 : 0.2;
+                float distortion = sin(dist * 10.0 - uTime * 0.5) * 0.1 * smoothstep(distThreshold, 0.0, dist);
+                pos.z += distortion * proximity;
+
+                // Snap back to original position when mouse is far
+                pos.z += (1.0 - proximity) * uSnapStrength;
+
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
             }
         `,
         fragmentShader: `
-            uniform float time;
-            uniform vec3 color;
-            varying vec3 vNormal;
-            varying vec3 vPosition;
-            
+            uniform sampler2D uTexture;
+            varying vec2 vUv;
+
             void main() {
-                vec3 light = normalize(vec3(1.0, 1.0, 1.0));
-                float fresnel = pow(1.0 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-                float diffuse = max(0.0, dot(vNormal, light));
-                vec3 baseColor = color;
-                vec3 finalColor = mix(baseColor, vec3(1.0), fresnel * 0.7);
-                finalColor *= (diffuse * 0.8 + 0.2);
-                finalColor += vec3(pow(fresnel, 2.0)) * 0.5;
-                gl_FragColor = vec4(finalColor, 1.0);
+                vec4 texel = texture2D(uTexture, vUv);
+                gl_FragColor = texel;
             }
-        `
+        `,
+        side: THREE.DoubleSide
     });
 
-    // Create logo mesh
-    logo = new THREE.Mesh(geometry, material);
-    logo.scale.set(0.8, 0.8, 0.8);
-    scene.add(logo);
+    // Create particle mesh
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
 
     // Position camera
     camera.position.z = 5;
@@ -137,48 +148,29 @@ function onWindowResize() {
 function animate(time) {
     requestAnimationFrame(animate);
 
-    if (logo) {
-        // Update shader time uniform
-        logo.material.uniforms.time.value = time * 0.001;
-
-        // Smooth rotation based on mouse position
-        const rotationSpeed = isMobile ? 0.03 : 0.05;
-        targetRotationY += (mouseX * 1.5 - targetRotationY) * rotationSpeed;
-        targetRotationX += (mouseY * 1.5 - targetRotationX) * rotationSpeed;
-
-        // Apply rotations
-        logo.rotation.y = targetRotationY;
-        logo.rotation.x = targetRotationX;
-
-        // Add scroll-based rotation
-        logo.rotation.z = scrollProgress * Math.PI * 2;
-
-        // Add floating animation
-        logo.position.y = Math.sin(time * 0.001) * 0.1;
-    }
+    // Update shader uniforms
+    particles.material.uniforms.uTime.value = time * 0.001;
+    particles.material.uniforms.uMouse.value.set((mouseX + 1) / 2, (mouseY + 1) / 2);
+    particles.material.uniforms.uSnapStrength.value = isMobile ? 0.05 : 0.1;
 
     renderer.render(scene, camera);
 }
 
 // Menu functionality
 function initializeMenu() {
-    console.log('Initializing menu...');
     const menuBtn = document.getElementById('menu-btn');
     const menu = document.getElementById('menu');
 
     if (!menuBtn || !menu) {
-        console.error('Menu elements not found:', { menuBtn, menu });
+        console.error('Menu elements not found');
         return;
     }
 
-    console.log('Menu elements found:', { menuBtn, menu });
     const spans = menuBtn.getElementsByTagName('span');
-    console.log('Menu spans found:', spans.length);
 
     // Add transition styles to spans
-    Array.from(spans).forEach((span, index) => {
+    Array.from(spans).forEach(span => {
         span.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
-        console.log(`Added transition to span ${index}`);
     });
 
     menuBtn.addEventListener('click', function() {
@@ -263,30 +255,16 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Google Sign-in
-window.onSignIn = function(googleUser) {
-    const profile = googleUser.getBasicProfile();
-    console.log('ID: ' + profile.getId());
-    console.log('Name: ' + profile.getName());
-    console.log('Email: ' + profile.getEmail());
-    // Here you would typically send the user info to your backend
-};
-
 // Wait for DOM to be fully loaded before initializing
 function initializeApp() {
-    console.log('Initializing app...');
     try {
         initializeMenu();
         init(); // Initialize Three.js scene
         animate();
-        console.log('App initialization complete');
     } catch (error) {
         console.error('Error during app initialization:', error);
     }
 }
 
 // Ensure DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM content loaded');
-    initializeApp();
-});
+document.addEventListener('DOMContentLoaded', initializeApp);
