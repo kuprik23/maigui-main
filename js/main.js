@@ -129,9 +129,8 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    if (particles) {
-        particles.material.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
-    }
+    // Update renderer size only
+    renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 function animate(time) {
