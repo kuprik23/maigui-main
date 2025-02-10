@@ -1,7 +1,7 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
 // Three.js Scene Setup
-let scene, camera, renderer, logo;
+let scene, camera, renderer, particles;
 let mouseX = 0, mouseY = 0;
 let targetRotationX = 0, targetRotationY = 0;
 let scrollProgress = 0;
@@ -9,107 +9,140 @@ let isMobile = window.innerWidth <= 768;
 
 // Initialize Three.js scene
 function init() {
-    // Scene setup
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer({ 
-        antialias: true, 
-        alpha: true,
-        powerPreference: "high-performance"
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
+    try {
+        // Scene setup
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ 
+            antialias: true, 
+            alpha: true,
+            powerPreference: "high-performance"
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-    // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 5, 5);
-    scene.add(directionalLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
 
-    // Load image and create texture
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load('images/eye.jpg');
+        // Load image and create texture
+        const loader = new THREE.TextureLoader();
+        loader.load('images/eye.jpg', 
+            // onLoad callback
+            function(texture) {
+                createParticles(texture);
+            },
+            // onProgress callback
+            undefined,
+            // onError callback
+            function(err) {
+                console.error('Error loading texture:', err);
+            }
+        );
 
-    // Create particle geometry
-    const width = 100;
-    const height = 100;
-    const size = isMobile ? 0.005 : 0.01;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(width * height * 3);
+        // Position camera
+        camera.position.z = 5;
 
-    for (let i = 0; i < width * height; i++) {
-        const x = (i % width) / width;
-        const y = Math.floor(i / width) / height;
-        positions[i * 3] = x * 2 - 1;
-        positions[i * 3 + 1] = y * 2 - 1;
-        positions[i * 3 + 2] = 0;
+        // Event Listeners
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('scroll', onScroll);
+        window.addEventListener('resize', onWindowResize);
+        
+        // Device orientation for mobile
+        if (isMobile && window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', onDeviceOrientation);
+        }
+    } catch (error) {
+        console.error('Error in init:', error);
     }
+}
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+function createParticles(texture) {
+    try {
+        // Create particle geometry
+        const width = isMobile ? 50 : 100;
+        const height = isMobile ? 50 : 100;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(width * height * 3);
+        const uvs = new Float32Array(width * height * 2);
 
-    // Create custom shader material
-    const material = new THREE.ShaderMaterial({
-        uniforms: {
-            uTexture: { value: texture },
-            uMouse: { value: new THREE.Vector2() },
-            uTime: { value: 0 },
-            uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
-        },
-        vertexShader: `
-            uniform vec2 uMouse;
-            uniform float uTime;
-            uniform vec2 uResolution;
-            uniform float uSnapStrength;
-            varying vec2 vUv;
+        for (let i = 0; i < width * height; i++) {
+            const x = (i % width) / width;
+            const y = Math.floor(i / width) / height;
+            
+            // Positions
+            positions[i * 3] = x * 2 - 1;
+            positions[i * 3 + 1] = y * 2 - 1;
+            positions[i * 3 + 2] = 0;
+            
+            // UVs
+            uvs[i * 2] = x;
+            uvs[i * 2 + 1] = y;
+        }
 
-            void main() {
-                vUv = uv;
-                vec3 pos = position;
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 
-                // Displace vertices based on mouse position
-                float dist = distance(uv, uMouse);
-                float proximity = 1.0 - smoothstep(0.0, 0.5, dist);
-                float distThreshold = isMobile ? 0.3 : 0.2;
-                float distortion = sin(dist * 10.0 - uTime * 0.5) * 0.1 * smoothstep(distThreshold, 0.0, dist);
-                pos.z += distortion * proximity;
+        // Create custom shader material
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                uTexture: { value: texture },
+                uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+                uTime: { value: 0 },
+                uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                uSnapStrength: { value: isMobile ? 0.05 : 0.1 }
+            },
+            vertexShader: `
+                uniform vec2 uMouse;
+                uniform float uTime;
+                uniform vec2 uResolution;
+                uniform float uSnapStrength;
+                varying vec2 vUv;
 
-                // Snap back to original position when mouse is far
-                pos.z += (1.0 - proximity) * uSnapStrength;
+                void main() {
+                    vUv = uv;
+                    vec3 pos = position;
 
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform sampler2D uTexture;
-            varying vec2 vUv;
+                    // Displace vertices based on mouse position
+                    float dist = distance(uv, uMouse);
+                    float proximity = 1.0 - smoothstep(0.0, 0.5, dist);
+                    float distThreshold = ${isMobile ? '0.3' : '0.2'};
+                    float distortion = sin(dist * 10.0 - uTime * 0.5) * 0.1 * smoothstep(distThreshold, 0.0, dist);
+                    pos.z += distortion * proximity;
 
-            void main() {
-                vec4 texel = texture2D(uTexture, vUv);
-                gl_FragColor = texel;
-            }
-        `,
-        side: THREE.DoubleSide
-    });
+                    // Snap back to original position when mouse is far
+                    pos.z += (1.0 - proximity) * uSnapStrength;
 
-    // Create particle mesh
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                    gl_PointSize = ${isMobile ? '2.0' : '3.0'};
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D uTexture;
+                varying vec2 vUv;
 
-    // Position camera
-    camera.position.z = 5;
+                void main() {
+                    vec4 texel = texture2D(uTexture, vUv);
+                    gl_FragColor = texel;
+                }
+            `,
+            transparent: true,
+            depthWrite: false,
+            depthTest: true
+        });
 
-    // Event Listeners
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('touchmove', onTouchMove, { passive: false });
-    window.addEventListener('scroll', onScroll);
-    window.addEventListener('resize', onWindowResize);
-    
-    // Device orientation for mobile
-    if (isMobile && window.DeviceOrientationEvent) {
-        window.addEventListener('deviceorientation', onDeviceOrientation);
+        // Create particle mesh
+        particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+    } catch (error) {
+        console.error('Error in createParticles:', error);
     }
 }
 
@@ -143,15 +176,20 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    if (particles) {
+        particles.material.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+    }
 }
 
 function animate(time) {
     requestAnimationFrame(animate);
 
-    // Update shader uniforms
-    particles.material.uniforms.uTime.value = time * 0.001;
-    particles.material.uniforms.uMouse.value.set((mouseX + 1) / 2, (mouseY + 1) / 2);
-    particles.material.uniforms.uSnapStrength.value = isMobile ? 0.05 : 0.1;
+    if (particles && particles.material.uniforms) {
+        // Update shader uniforms
+        particles.material.uniforms.uTime.value = time * 0.001;
+        particles.material.uniforms.uMouse.value.set((mouseX + 1) / 2, (mouseY + 1) / 2);
+        particles.material.uniforms.uSnapStrength.value = isMobile ? 0.05 : 0.1;
+    }
 
     renderer.render(scene, camera);
 }
