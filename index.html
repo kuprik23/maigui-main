@@ -419,14 +419,14 @@
         <section id="partners" class="section">
             <h2>Strategic Partners</h2>
             <div class="partners-grid">
-                <div class="partner">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/Lenovo_logo_2015.svg" alt="Lenovo" style="height: 40px; filter: brightness(0) invert(1);">
+                <div class="partner lenovo">
+                    <div class="lenovo-logo">LENOVO</div>
                 </div>
                 <div class="partner">
-                    <img src="https://convai.com/images/logo-white.svg" alt="Convai" style="height: 40px;">
+                    <div class="partner-text">CONVAI</div>
                 </div>
                 <div class="partner">
-                    <img src="https://sequence.xyz/sequence-logo-white.svg" alt="Sequence" style="height: 40px;">
+                    <div class="partner-text">SEQUENCE</div>
                 </div>
             </div>
         </section>
@@ -457,7 +457,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 1rem;
+            padding: 2rem;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
             min-width: 200px;
@@ -467,6 +467,22 @@
         .partner:hover {
             transform: translateY(-5px);
             background: rgba(255, 255, 255, 0.08);
+        }
+
+        .lenovo-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -1px;
+        }
+
+        .partner-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 1px;
         }
 
         footer {
