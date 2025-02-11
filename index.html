@@ -420,21 +420,24 @@
             <h2>Our Partners</h2>
             <div class="partners-grid">
                 <div class="partner lenovo">
-                    <div class="lenovo-logo">LENOVO</div>
-                </div>
-                <div class="partner convai">
-                    <div class="convai-logo">
-                        <span class="convai-cross">+</span>
-                        <span class="convai-text">convai</span>
+                    <div class="lenovo-logo-container">
+                        <div class="lenovo-logo-bg"></div>
+                        <div class="lenovo-logo-text">LENOVO</div>
                     </div>
                 </div>
-                <div class="partner">
-                    <div class="partner-text">SEQUENCE</div>
+                <div class="partner convai">
+                    <div class="convai-logo-container">
+                        <div class="convai-cross"></div>
+                        <div class="convai-text">convai</div>
+                    </div>
+                </div>
+                <div class="partner sequence">
+                    <div class="sequence-logo">SEQUENCE</div>
                 </div>
                 <div class="partner horizon">
-                    <div class="horizon-logo">
-                        <span class="horizon-sun"></span>
-                        <span class="horizon-text">HORIZON</span>
+                    <div class="horizon-logo-container">
+                        <div class="horizon-sun"></div>
+                        <div class="horizon-text">HORIZON</div>
                     </div>
                 </div>
             </div>
@@ -478,65 +481,82 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        .lenovo-logo {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2.5rem;
+        .lenovo-logo-container {
+            background: #E2231A;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+        }
+
+        .lenovo-logo-text {
+            color: white;
+            font-size: 2rem;
             font-weight: 700;
-            color: #ffffff;
             letter-spacing: -1px;
         }
 
-        .partner-text {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 2rem;
-            font-weight: 600;
-            color: #ffffff;
-            letter-spacing: 1px;
-        }
-
-        .convai-logo {
+        .convai-logo-container {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
         .convai-cross {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #00A67E;
-            line-height: 1;
-            margin-right: 0.25rem;
+            width: 24px;
+            height: 24px;
+            background: #00A67E;
+            position: relative;
+        }
+
+        .convai-cross::before,
+        .convai-cross::after {
+            content: '';
+            position: absolute;
+            background: #00A67E;
+        }
+
+        .convai-cross::before {
+            width: 24px;
+            height: 8px;
+            top: 8px;
+            left: 0;
+        }
+
+        .convai-cross::after {
+            width: 8px;
+            height: 24px;
+            left: 8px;
+            top: 0;
         }
 
         .convai-text {
-            font-family: 'Space Grotesk', sans-serif;
+            color: white;
             font-size: 2rem;
             font-weight: 600;
-            color: #ffffff;
-            letter-spacing: 0;
         }
 
-        .horizon-logo {
+        .horizon-logo-container {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1rem;
         }
 
         .horizon-sun {
-            width: 2rem;
-            height: 2rem;
+            width: 30px;
+            height: 30px;
             background: #E87C3E;
             border-radius: 50%;
-            position: relative;
-            display: inline-block;
-            margin-right: 0.5rem;
         }
 
         .horizon-text {
-            font-family: 'Space Grotesk', sans-serif;
+            color: #E87C3E;
             font-size: 2rem;
             font-weight: 600;
-            color: #E87C3E;
+        }
+
+        .sequence-logo {
+            color: white;
+            font-size: 2rem;
+            font-weight: 600;
             letter-spacing: 1px;
         }
 
