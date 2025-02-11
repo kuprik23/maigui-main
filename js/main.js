@@ -61,7 +61,7 @@ function init() {
 async function loadModel() {
     try {
         const loader = new GLTFLoader();
-        const gltf = await loader.loadAsync('./Golden_Vision_20cm.glb');
+        const gltf = await loader.loadAsync('/Golden_Vision_20cm.glb');
 
         model = gltf.scene;
         model.scale.set(2, 2, 2);
