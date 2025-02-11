@@ -61,7 +61,7 @@ function init() {
 async function loadModel() {
     try {
         const loader = new GLTFLoader();
-        const gltf = await loader.loadAsync('models/Golden_Vision_Over_Ci_0211034553_texture.glb');
+        const gltf = await loader.loadAsync('Golden_Vision_Over_Ci_0211034553_texture.glb');
 
         model = gltf.scene;
         model.scale.set(2, 2, 2);
