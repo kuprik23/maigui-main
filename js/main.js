@@ -1,11 +1,8 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { MeshyAPI } from '@meshy/sdk';
 
 // Three.js Scene Setup
 let scene, camera, renderer, model;
-const MESHY_API_KEY = 'msy_VSMMtZKsokyKMkyex1MnVMIQrOAqhHt9K8Xa';
-const meshy = new MeshyAPI(MESHY_API_KEY);
 let mouseX = 0, mouseY = 0;
 let targetRotationX = 0, targetRotationY = 0;
 let scrollProgress = 0;
@@ -40,9 +37,9 @@ function init() {
         loadingOverlay.innerHTML = '<div class="loader"></div>';
         document.body.appendChild(loadingOverlay);
 
-        // Generate and load 3D model
-        generateAndLoadModel();
-
+        // Load 3D model
+        loadModel();
+        
         // Position camera
         camera.position.z = 5;
 
@@ -61,20 +58,11 @@ function init() {
     }
 }
 
-async function generateAndLoadModel() {
+async function loadModel() {
     try {
-        // Generate 3D model using Meshy
-        const prompt = "A futuristic AI brain, highly detailed, cybernetic, glowing with energy";
-        const response = await meshy.generateModel({
-            prompt: prompt,
-            style: "realistic",
-            format: "glb"
-        });
-
-        // Load the generated model
         const loader = new GLTFLoader();
-        const gltf = await loader.loadAsync(response.modelUrl);
-        
+        const gltf = await loader.loadAsync('models/model.glb');
+
         model = gltf.scene;
         model.scale.set(2, 2, 2);
         model.position.set(0, 0, 0);
@@ -89,9 +77,8 @@ async function generateAndLoadModel() {
             loadingOverlay.classList.add('hidden');
             setTimeout(() => loadingOverlay.remove(), 500);
         }
-
     } catch (error) {
-        console.error('Error generating/loading model:', error);
+        console.error('Error loading model:', error);
         const loadingOverlay = document.querySelector('.loading-overlay');
         if (loadingOverlay) {
             loadingOverlay.innerHTML = '<p style="color: white;">Error loading 3D model. Please try again.</p>';
