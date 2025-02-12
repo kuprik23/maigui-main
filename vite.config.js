@@ -1,7 +1,5 @@
 import { defineConfig } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
-import basicSsl from '@vitejs/plugin-basic-ssl';
-
 export default defineConfig({
   base: '',
   server: {
@@ -11,8 +9,7 @@ export default defineConfig({
   plugins: [
     legacy({
       targets: ['defaults', 'not IE 11']
-    }),
-    basicSsl()
+    })
   ],
   resolve: {
     alias: {

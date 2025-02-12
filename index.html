@@ -419,25 +419,24 @@
         <section id="partners" class="section">
             <h2>Our Partners</h2>
             <div class="partners-grid">
-                <div class="partner lenovo">
-                    <div class="lenovo-logo-container">
-                        <div class="lenovo-logo-bg"></div>
-                        <div class="lenovo-logo-text">LENOVO</div>
+                <div class="partner">
+                    <img src="/images/lenovo-logo.svg" alt="Lenovo" class="partner-logo">
+                </div>
+                <div class="partner">
+                    <div class="partner-logo convai-logo">
+                        <span class="convai-cross"></span>
+                        <span>convai</span>
                     </div>
                 </div>
-                <div class="partner convai">
-                    <div class="convai-logo-container">
-                        <div class="convai-cross"></div>
-                        <div class="convai-text">convai</div>
+                <div class="partner">
+                    <div class="partner-logo sequence-logo">
+                        SEQUENCE
                     </div>
                 </div>
-                <div class="partner sequence">
-                    <div class="sequence-logo">SEQUENCE</div>
-                </div>
-                <div class="partner horizon">
-                    <div class="horizon-logo-container">
-                        <div class="horizon-sun"></div>
-                        <div class="horizon-text">HORIZON</div>
+                <div class="partner">
+                    <div class="partner-logo horizon-logo">
+                        <span class="horizon-sun"></span>
+                        <span>HORIZON</span>
                     </div>
                 </div>
             </div>
@@ -457,107 +456,110 @@
 
     <style>
         .partners-grid {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 4rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: clamp(1rem, 3vw, 3rem);
+            margin-top: clamp(2rem, 5vw, 3rem);
+            padding: clamp(1rem, 3vw, 2rem);
+            max-width: 1200px;
+            width: 100%;
         }
 
         .partner {
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 2rem;
+            padding: clamp(1rem, 3vw, 2rem);
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            min-width: 200px;
+            border-radius: clamp(10px, 2vw, 15px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            /* Add touch-action for better mobile interaction */
+            touch-action: manipulation;
+        }
+
+        @media (hover: hover) {
+            .partner:hover {
+                transform: translateY(-8px);
+                background: rgba(255, 255, 255, 0.1);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            }
+
+            .partner:hover .partner-logo {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Active state for touch devices */
+        @media (hover: none) {
+            .partner:active {
+                transform: translateY(-4px);
+                background: rgba(255, 255, 255, 0.1);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .partner:active .partner-logo {
+                transform: scale(1.02);
+            }
+        }
+
+        .partner-logo {
+            max-width: clamp(120px, 15vw, 180px);
+            height: auto;
             transition: all 0.3s ease;
         }
 
-        .partner:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .lenovo-logo-container {
-            background: #E2231A;
-            padding: 1rem 2rem;
-            border-radius: 4px;
-        }
-
-        .lenovo-logo-text {
-            color: white;
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: -1px;
-        }
-
-        .convai-logo-container {
+        /* Convai Logo */
+        .convai-logo {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-        }
-
-        .convai-cross {
-            width: 24px;
-            height: 24px;
-            background: #00A67E;
-            position: relative;
-        }
-
-        .convai-cross::before,
-        .convai-cross::after {
-            content: '';
-            position: absolute;
-            background: #00A67E;
-        }
-
+            gap: clamp(0.5rem, 2vw, 1rem);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 600;
+            color: #00A67E;
         .convai-cross::before {
-            width: 24px;
-            height: 8px;
-            top: 8px;
+            width: 30px;
+            height: 10px;
+            top: 10px;
             left: 0;
         }
 
         .convai-cross::after {
-            width: 8px;
-            height: 24px;
-            left: 8px;
+            width: 10px;
+            height: 30px;
+            left: 10px;
             top: 0;
         }
 
-        .convai-text {
-            color: white;
-            font-size: 2rem;
-            font-weight: 600;
+        /* Sequence Logo */
+        .sequence-logo {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, #fff, #e0e0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .horizon-logo-container {
+        /* Horizon Logo */
+        .horizon-logo {
             display: flex;
             align-items: center;
             gap: 1rem;
-        }
-
-        .horizon-sun {
-            width: 30px;
-            height: 30px;
-            background: #E87C3E;
-            border-radius: 50%;
-        }
-
-        .horizon-text {
             color: #E87C3E;
             font-size: 2rem;
             font-weight: 600;
         }
 
-        .sequence-logo {
-            color: white;
-            font-size: 2rem;
-            font-weight: 600;
-            letter-spacing: 1px;
+        .horizon-sun {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: currentColor;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(232, 124, 62, 0.4);
         }
 
         footer {
