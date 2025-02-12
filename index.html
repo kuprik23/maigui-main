@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Em3rsa - Pioneering the future of 3D AI Agents with cutting-edge technology and innovative solutions">
     <meta name="keywords" content="3D AI, AI Agents, Virtual Agents, 3D Technology, AI Innovation">
     <meta property="og:title" content="Em3rsa - 3D AI Agents">
@@ -23,6 +23,12 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Improved touch handling for all interactive elements */
+        button, a, .video-container, .partner {
+            touch-action: manipulation;
         }
 
         .hero-background {
@@ -89,6 +95,8 @@
             line-height: 1.6;
             opacity: 0;
             animation: fadeIn 1s ease-out forwards;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         @keyframes fadeIn {
@@ -180,7 +188,7 @@
         .content {
             position: relative;
             z-index: 1;
-            padding: 100px 50px;
+            padding: clamp(20px, 5vw, 100px) clamp(15px, 3vw, 50px);
         }
 
         .section {
@@ -191,9 +199,9 @@
             flex-direction: column;
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(8px);
-            border-radius: 20px;
-            margin: 20px;
-            padding: 40px;
+            border-radius: clamp(10px, 2vw, 20px);
+            margin: clamp(10px, 2vw, 20px);
+            padding: clamp(20px, 4vw, 40px);
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 0;
             transform: translateY(20px);
@@ -271,22 +279,40 @@
             opacity: 1;
         }
 
+        /* Enhanced Video Container */
         .video-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
-            margin: 30px auto;
-            padding-bottom: 56.25%;
+            max-width: min(90vw, 800px);
+            margin: clamp(15px, 4vw, 30px) auto;
+            padding-bottom: min(75vh, 56.25%); /* Limit height on tall mobile screens */
             height: 0;
             overflow: hidden;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-radius: clamp(8px, 2vw, 15px);
+            box-shadow: 0 clamp(4px, 1vw, 8px) clamp(16px, 4vw, 32px) rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease;
             background: rgba(0, 0, 0, 0.2);
+            /* Improve touch handling */
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            /* Optimize performance */
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
-        .video-container:hover {
-            transform: scale(1.02);
+        /* Hover effects only for non-touch devices */
+        @media (hover: hover) {
+            .video-container:hover {
+                transform: scale(1.02);
+            }
+        }
+
+        /* Active state for touch devices */
+        @media (hover: none) {
+            .video-container:active {
+                transform: scale(0.98);
+            }
         }
 
         .video-container iframe {
@@ -296,6 +322,37 @@
             width: 100%;
             height: 100%;
             border: none;
+            /* Improve performance */
+            will-change: transform;
+            /* Enable hardware acceleration */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            /* Smoother scaling */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        /* Video container responsive adjustments */
+        @media (max-width: 768px) {
+            .video-container {
+                margin: 15px auto;
+                max-width: 95vw;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .video-container {
+                margin: 10px auto;
+                border-radius: 6px;
+            }
+        }
+
+        /* Landscape mode optimization */
+        @media (max-height: 480px) and (orientation: landscape) {
+            .video-container {
+                max-width: 70vw;
+                padding-bottom: 40%;
+            }
         }
 
         .placeholder {
@@ -310,7 +367,6 @@
             justify-content: center;
             font-size: 24px;
         }
-
 
         .features-grid {
             display: grid;
@@ -346,115 +402,7 @@
             font-size: 1rem;
             line-height: 1.6;
         }
-    </style>
-</head>
-<body>
-    <div class="hero-background"></div>
-    <div class="hero-overlay"></div>
-    
-    <button id="menu-btn">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
 
-    <nav id="menu">
-        <a href="#about">About</a>
-        <a href="#services">Services</a>
-        <a href="#contact">Contact</a>
-    </nav>
-
-    <div class="content">
-        <section id="home" class="section">
-            <h1 style="font-size: 4rem; margin-bottom: 0.5rem; background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none;">Em3rsa</h1>
-            <p style="font-size: 2rem; margin-bottom: 1rem; color: rgba(255, 255, 255, 0.9); font-weight: 600;">Empower Future</p>
-            <p style="font-size: 1.5rem; margin-bottom: 2rem; color: rgba(255, 255, 255, 0.9);">Exploring the Future of 3D AI Agents</p>
-            
-            <div id="canvas-container"></div>
-
-            <div class="features-grid">
-                <div class="feature">
-                    <h3>Advanced AI</h3>
-                    <p>Cutting-edge artificial intelligence powering our 3D agents</p>
-                </div>
-                <div class="feature">
-                    <h3>Real-time Interaction</h3>
-                    <p>Seamless real-time interaction with AI agents</p>
-                </div>
-                <div class="feature">
-                    <h3>Custom Solutions</h3>
-                    <p>Tailored 3D AI solutions for your specific needs</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="about" class="section">
-            <h2>About Us</h2>
-            <p>Learn more about Em3rsa and our mission in the world of 3D AI Agents.</p>
-            <div class="video-container">
-                <iframe 
-                    width="560" 
-                    height="315" 
-                    src="https://www.youtube.com/embed/R3DGNWj0Ilw" 
-                    title="Em3rsa Video"
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-                </iframe>
-            </div>
-        </section>
-
-        <section id="services" class="section">
-            <h2>Our Services</h2>
-            <p>Discover the range of cutting-edge 3D AI solutions we offer:</p>
-            <ul>
-                <li>Custom 3D AI agent development</li>
-                <li>Interactive virtual environments</li> 
-                <li>AI-driven animation and behaviors</li>
-                <li>Integration with existing platforms and systems</li>
-            </ul>
-            <p>Contact us to learn how our services can bring your vision to life.</p>
-        </section>
-
-        <section id="partners" class="section">
-            <h2>Our Partners</h2>
-            <div class="partners-grid">
-                <div class="partner">
-                    <img src="/images/lenovo-logo.svg" alt="Lenovo" class="partner-logo">
-                </div>
-                <div class="partner">
-                    <div class="partner-logo convai-logo">
-                        <span class="convai-cross"></span>
-                        <span>convai</span>
-                    </div>
-                </div>
-                <div class="partner">
-                    <div class="partner-logo sequence-logo">
-                        SEQUENCE
-                    </div>
-                </div>
-                <div class="partner">
-                    <div class="partner-logo horizon-logo">
-                        <span class="horizon-sun"></span>
-                        <span>HORIZON</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="contact" class="section">
-            <h2>Contact</h2>
-            <p>Get in touch with us to discuss your 3D AI needs.</p>
-            <p>Email: 4D@emersa.io</p>
-            <p>Phone: +4407494355879</p>
-        </section>
-
-        <footer style="text-align: center; padding: 20px; color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
-            <p>&copy; 2024 Emersa Ltd. All rights reserved.</p>
-        </footer>
-    </div>
-
-    <style>
         .partners-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -474,7 +422,6 @@
             border-radius: clamp(10px, 2vw, 15px);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(10px);
-            /* Add touch-action for better mobile interaction */
             touch-action: manipulation;
         }
 
@@ -490,7 +437,6 @@
             }
         }
 
-        /* Active state for touch devices */
         @media (hover: none) {
             .partner:active {
                 transform: translateY(-4px);
@@ -509,7 +455,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Convai Logo */
         .convai-logo {
             display: flex;
             align-items: center;
@@ -548,7 +493,6 @@
             top: 0;
         }
 
-        /* Sequence Logo */
         .sequence-logo {
             font-size: clamp(1.8rem, 4vw, 2.2rem);
             font-weight: 700;
@@ -559,7 +503,6 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* Horizon Logo */
         .horizon-logo {
             display: flex;
             align-items: center;
@@ -579,7 +522,6 @@
             box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(232, 124, 62, 0.4);
         }
 
-        /* Additional mobile optimizations */
         @media (max-width: 480px) {
             .partners-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -597,5 +539,104 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
+</head>
+<body>
+    <div class="hero-background"></div>
+    <div class="hero-overlay"></div>
+    
+    <button id="menu-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav id="menu">
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="content">
+        <section id="home" class="section">
+            <h1 style="font-size: clamp(2.5rem, 8vw, 4rem); margin-bottom: 0.5rem; background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none;">Em3rsa</h1>
+            <p style="font-size: clamp(1.5rem, 4vw, 2rem); margin-bottom: 1rem; color: rgba(255, 255, 255, 0.9); font-weight: 600;">Empower Future</p>
+            <p style="font-size: clamp(1.2rem, 3vw, 1.5rem); margin-bottom: 2rem; color: rgba(255, 255, 255, 0.9);">Exploring the Future of 3D AI Agents</p>
+            
+            <div id="canvas-container"></div>
+
+            <div class="features-grid">
+                <div class="feature">
+                    <h3>Advanced AI</h3>
+                    <p>Cutting-edge artificial intelligence powering our 3D agents</p>
+                </div>
+                <div class="feature">
+                    <h3>Real-time Interaction</h3>
+                    <p>Seamless real-time interaction with AI agents</p>
+                </div>
+                <div class="feature">
+                    <h3>Custom Solutions</h3>
+                    <p>Tailored 3D AI solutions for your specific needs</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <h2>About Us</h2>
+            <p>Learn more about Em3rsa and our mission in the world of 3D AI Agents.</p>
+            <div class="video-container">
+                <iframe 
+                    width="560" 
+                    height="315" 
+                    src="https://www.youtube.com/embed/yCaP1oKKDxE" 
+                    title="Em3rsa Video"
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen
+                    loading="lazy">
+                </iframe>
+            </div>
+        </section>
+
+        <section id="services" class="section">
+            <h2>Our Services</h2>
+            <p>Discover the range of cutting-edge 3D AI solutions we offer:</p>
+            <ul>
+                <li>Custom 3D AI agent development</li>
+                <li>Interactive virtual environments</li> 
+                <li>AI-driven animation and behaviors</li>
+                <li>Integration with existing platforms and systems</li>
+            </ul>
+            <p>Contact us to learn how our services can bring your vision to life.</p>
+        </section>
+
+        <section id="partners" class="section">
+            <h2>Our Partners</h2>
+            <div class="partners-grid">
+                <div class="partner">
+                    <img src="/images/lenovo-logo.png" alt="Lenovo" class="partner-logo">
+                </div>
+                <div class="partner">
+                    <img src="/images/convai-logo.png" alt="Convai" class="partner-logo">
+                </div>
+                <div class="partner">
+                    <img src="/images/sequence-logo.png" alt="Sequence" class="partner-logo">
+                </div>
+                <div class="partner">
+                    <img src="/images/horizon-logo.png" alt="Horizon" class="partner-logo">
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section">
+            <h2>Contact</h2>
+            <p>Get in touch with us to discuss your 3D AI needs.</p>
+            <p>Email: 4D@emersa.io</p>
+            <p>Phone: +4407494355879</p>
+        </section>
+
+        <footer style="text-align: center; padding: 20px; color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
+            <p>&copy; 2024 Emersa Ltd. All rights reserved.</p>
+        </footer>
+    </div>
 </body>
 </html>
