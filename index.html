@@ -517,6 +517,23 @@
             font-size: clamp(1.5rem, 4vw, 2rem);
             font-weight: 600;
             color: #00A67E;
+        }
+
+        .convai-cross {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: currentColor;
+            position: relative;
+        }
+
+        .convai-cross::before,
+        .convai-cross::after {
+            content: '';
+            position: absolute;
+            background: currentColor;
+        }
+
         .convai-cross::before {
             width: 30px;
             height: 10px;
@@ -533,9 +550,9 @@
 
         /* Sequence Logo */
         .sequence-logo {
-            font-size: 2.2rem;
+            font-size: clamp(1.8rem, 4vw, 2.2rem);
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: clamp(1px, 0.5vw, 2px);
             background: linear-gradient(45deg, #fff, #e0e0e0);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -546,20 +563,33 @@
         .horizon-logo {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: clamp(0.5rem, 2vw, 1rem);
             color: #E87C3E;
-            font-size: 2rem;
+            font-size: clamp(1.5rem, 4vw, 2rem);
             font-weight: 600;
         }
 
         .horizon-sun {
             display: inline-block;
-            width: 35px;
-            height: 35px;
+            width: clamp(25px, 5vw, 35px);
+            height: clamp(25px, 5vw, 35px);
             background: currentColor;
             border-radius: 50%;
             position: relative;
-            box-shadow: 0 0 20px rgba(232, 124, 62, 0.4);
+            box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(232, 124, 62, 0.4);
+        }
+
+        /* Additional mobile optimizations */
+        @media (max-width: 480px) {
+            .partners-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 360px) {
+            .partners-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         footer {
