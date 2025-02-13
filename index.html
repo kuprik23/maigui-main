@@ -18,6 +18,36 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script type="module" src="js/main.js" crossorigin="anonymous"></script>
+    <script>
+        // Lazy loading for images
+        document.addEventListener("DOMContentLoaded", function() {
+            if ("IntersectionObserver" in window) {
+                const lazyImages = document.querySelectorAll("img.lazy");
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.src = img.dataset.src;
+                            img.classList.remove("lazy");
+                            observer.unobserve(img);
+                        }
+                    });
+                }, {
+                    rootMargin: "50px 0px", // Start loading 50px before the image enters viewport
+                    threshold: 0.01
+                });
+
+                lazyImages.forEach(img => imageObserver.observe(img));
+            } else {
+                // Fallback for browsers that don't support IntersectionObserver
+                const lazyImages = document.querySelectorAll("img.lazy");
+                lazyImages.forEach(img => {
+                    img.src = img.dataset.src;
+                    img.classList.remove("lazy");
+                });
+            }
+        });
+    </script>
     <style>
         * {
             margin: 0;
@@ -415,7 +445,7 @@
 
         .partner {
             display: flex;
-             justify-content: center;
+            justify-content: center;
             align-items: center;
             padding: clamp(1rem, 3vw, 2rem);
             background: rgba(255, 255, 255, 0.05);
@@ -425,6 +455,20 @@
             touch-action: manipulation;
         }
 
+        .partner-logo {
+            max-width: 100%;
+            height: auto;
+            transition: transform 0.3s ease;
+            will-change: transform;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            /* Optimize image loading */
+            loading: lazy;
+            /* Prevent layout shift */
+            aspect-ratio: attr(width) / attr(height);
+        }
+
+        /* Hover effects for desktop */
         @media (hover: hover) {
             .partner:hover {
                 transform: translateY(-8px);
@@ -437,6 +481,7 @@
             }
         }
 
+        /* Touch effects for mobile */
         @media (hover: none) {
             .partner:active {
                 transform: translateY(-4px);
@@ -449,94 +494,19 @@
             }
         }
 
-        .partner-logo {
-            max-width: clamp(120px, 15vw, 180px);
-            height: auto;
-            transition: all 0.3s ease;
-        }
-
-        .convai-logo {
-            display: flex;
-            align-items: center;
-            gap: clamp(0.5rem, 2vw, 1rem);
-            font-size: clamp(1.5rem, 4vw, 2rem);
-            font-weight: 600;
-            color: #00A67E;
-        }
-
-        .convai-cross {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            background: currentColor;
-            position: relative;
-        }
-
-        .convai-cross::before,
-        .convai-cross::after {
-            content: '';
-            position: absolute;
-            background: currentColor;
-        }
-
-        .convai-cross::before {
-            width: 30px;
-            height: 10px;
-            top: 10px;
-            left: 0;
-        }
-
-        .convai-cross::after {
-            width: 10px;
-            height: 30px;
-            left: 10px;
-            top: 0;
-        }
-
-        .sequence-logo {
-            font-size: clamp(1.8rem, 4vw, 2.2rem);
-            font-weight: 700;
-            letter-spacing: clamp(1px, 0.5vw, 2px);
-            background: linear-gradient(45deg, #fff, #e0e0e0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .horizon-logo {
-            display: flex;
-            align-items: center;
-            gap: clamp(0.5rem, 2vw, 1rem);
-            color: #E87C3E;
-            font-size: clamp(1.5rem, 4vw, 2rem);
-            font-weight: 600;
-        }
-
-        .horizon-sun {
-            display: inline-block;
-            width: clamp(25px, 5vw, 35px);
-            height: clamp(25px, 5vw, 35px);
-            background: currentColor;
-            border-radius: 50%;
-            position: relative;
-            box-shadow: 0 0 clamp(10px, 3vw, 20px) rgba(232, 124, 62, 0.4);
-        }
-
-        @media (max-width: 480px) {
-            .partners-grid {
-                grid-template-columns: repeat(2, 1fr);
+        /* Optimize animations for reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .partner, .partner-logo {
+                transition: none;
             }
-        }
 
-        @media (max-width: 360px) {
-            .partners-grid {
-                grid-template-columns: 1fr;
+            .partner:hover, .partner:active {
+                transform: none;
             }
-        }
 
-        footer {
-            margin-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            .partner:hover .partner-logo, .partner:active .partner-logo {
+                transform: none;
+            }
         }
     </style>
 </head>
@@ -613,13 +583,13 @@
             <h2>Our Partners</h2>
             <div class="partners-grid">
                 <div class="partner">
-                    <img src="/images/lenovo-logo.png" alt="Lenovo" class="partner-logo" style="width: 400px; height: auto;">
+                    <img data-src="/images/lenovo-logo.png" alt="Lenovo" class="partner-logo lazy" width="400" height="400">
                 </div>
                 <div class="partner">
-                    <img src="/images/convai.png" alt="Convai" class="partner-logo" style="width: 400px; height: auto;">
+                    <img data-src="/images/convai.png" alt="Convai" class="partner-logo lazy" width="400" height="400">
                 </div>
                 <div class="partner">
-                    <img src="/images/horizon-logo.png" alt="Horizon" class="partner-logo" style="width: 400px; height: auto;">
+                    <img data-src="/images/horizon-logo.png" alt="Horizon" class="partner-logo lazy" width="400" height="400">
                 </div>
             </div>
         </section>

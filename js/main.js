@@ -66,10 +66,39 @@ async function loadModel() {
         model = gltf.scene;
         model.scale.set(2, 2, 2);
         model.position.set(0, 0, 0);
+        
+        // Apply CSS animations
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.material.onBeforeCompile = (shader) => {
+                    shader.vertexShader = `
+                        uniform float uTime;
+                        ${shader.vertexShader}
+                    `.replace(
+                        `#include <begin_vertex>`,
+                        `#include <begin_vertex>
+                        
+                        // Rotation animation
+                        float angle = uTime * 0.5;
+                        mat3 rotationMatrix = mat3(
+                            cos(angle), 0.0, sin(angle),
+                            0.0, 1.0, 0.0,
+                            -sin(angle), 0.0, cos(angle)
+                        );
+                        transformed = vec3(rotationMatrix * transformed);
+                        
+                        // Floating animation
+                        float floatingFactor = 0.1;
+                        transformed.y += sin(uTime * 1.5) * floatingFactor;
+                        `
+                    );
+                    
+                    shader.uniforms.uTime = { value: 0 };
+                };
+            }
+        });
+        
         scene.add(model);
-
-        // Add rotation animation
-        model.rotation.y = Math.PI / 4;
 
         // Remove loading overlay
         const loadingOverlay = document.querySelector('.loading-overlay');
@@ -106,9 +135,16 @@ function onDeviceOrientation(event) {
     }
 }
 
+let scrollTimeout;
+
 function onScroll() {
-    const scrollMax = document.documentElement.scrollHeight - window.innerHeight;
-    scrollProgress = window.scrollY / scrollMax;
+    if (!scrollTimeout) {
+        scrollTimeout = setTimeout(function() {
+            scrollTimeout = null;
+            const scrollMax = document.documentElement.scrollHeight - window.innerHeight;
+            scrollProgress = window.scrollY / scrollMax;
+        }, 100);
+    }
 }
 
 function onWindowResize() {
@@ -120,17 +156,8 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function animate(time) {
+function animate() {
     requestAnimationFrame(animate);
-
-    if (model) {
-        // Rotate model
-        model.rotation.y += 0.005;
-        
-        // Add floating animation
-        model.position.y = Math.sin(time * 0.001) * 0.1;
-    }
-
     renderer.render(scene, camera);
 }
 
