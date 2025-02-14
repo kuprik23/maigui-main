@@ -68,35 +68,18 @@ async function loadModel() {
         model.position.set(0, 0, 0);
         
         // Apply CSS animations
-        model.traverse((child) => {
-            if (child.isMesh) {
-                child.material.onBeforeCompile = (shader) => {
-                    shader.vertexShader = `
-                        uniform float uTime;
-                        ${shader.vertexShader}
-                    `.replace(
-                        `#include <begin_vertex>`,
-                        `#include <begin_vertex>
-                        
-                        // Rotation animation
-                        float angle = uTime * 0.5;
-                        mat3 rotationMatrix = mat3(
-                            cos(angle), 0.0, sin(angle),
-                            0.0, 1.0, 0.0,
-                            -sin(angle), 0.0, cos(angle)
-                        );
-                        transformed = vec3(rotationMatrix * transformed);
-                        
-                        // Floating animation
-                        float floatingFactor = 0.1;
-                        transformed.y += sin(uTime * 1.5) * floatingFactor;
-                        `
-                    );
-                    
-                    shader.uniforms.uTime = { value: 0 };
-                };
+        // Set initial rotation
+        model.rotation.y = Math.PI / 4;
+        
+        // Add continuous rotation
+        function animate() {
+            requestAnimationFrame(animate);
+            if (model) {
+                model.rotation.y += 0.005; // Adjust speed as needed
             }
-        });
+            renderer.render(scene, camera);
+        }
+        animate();
         
         scene.add(model);
 
