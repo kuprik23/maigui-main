@@ -9,13 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@types/three": "latest",
-    "gsap": "latest",
-    "three": "latest"
+    "@types/three": "0.160.0",
+    "gsap": "3.12.5",
+    "three": "0.160.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-basic-ssl": "latest",
-    "@vitejs/plugin-legacy": "latest", 
-    "vite": "latest"
+    "@vitejs/plugin-basic-ssl": "1.0.2",
+    "@vitejs/plugin-legacy": "4.1.1",
+    "vite": "4.5.9"
   }
 }
