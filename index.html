@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Creating interactive human-like characters with empathy using cutting-edge AI technology">
     <meta name="keywords" content="3D AI, Interactive Characters, Virtual Humans, Empathetic AI, Human-like AI">
     <meta property="og:title" content="Interactive AI Characters">
@@ -18,47 +18,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script type="module" src="js/main.js" crossorigin="anonymous"></script>
-    <script>
-        // Lazy loading for images
-        document.addEventListener("DOMContentLoaded", function() {
-            if ("IntersectionObserver" in window) {
-                const lazyImages = document.querySelectorAll("img.lazy");
-                const imageObserver = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const img = entry.target;
-                            img.src = img.dataset.src;
-                            img.classList.remove("lazy");
-                            observer.unobserve(img);
-                        }
-                    });
-                }, {
-                    rootMargin: "50px 0px", // Start loading 50px before the image enters viewport
-                    threshold: 0.01
-                });
-
-                lazyImages.forEach(img => imageObserver.observe(img));
-            } else {
-                // Fallback for browsers that don't support IntersectionObserver
-                const lazyImages = document.querySelectorAll("img.lazy");
-                lazyImages.forEach(img => {
-                    img.src = img.dataset.src;
-                    img.classList.remove("lazy");
-                });
-            }
-        });
-    </script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Improved touch handling for all interactive elements */
-        button, a, .video-container, .partner {
-            touch-action: manipulation;
+        html {
+            scroll-behavior: smooth;
+            height: -webkit-fill-available;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #000;
+            color: #fff;
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            -webkit-font-smoothing: antialiased;
         }
 
         .hero-background {
@@ -69,7 +49,6 @@
             height: 100vh;
             background: linear-gradient(135deg, #000000, #1a1a1a);
             z-index: -2;
-            animation: pulseEffect 15s ease-in-out infinite;
         }
 
         .hero-overlay {
@@ -78,88 +57,56 @@
             left: 0;
             width: 100%;
             height: 100vh;
-            background: linear-gradient(
-                135deg,
-                rgba(0, 0, 0, 0.9) 0%,
-                rgba(0, 0, 0, 0.7) 50%,
-                rgba(0, 0, 0, 0.9) 100%
-            );
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
             z-index: -1;
         }
 
-        /* 3D Logo Container */
         #canvas-container {
-            width: 100%;
-            height: 50vh;
-            min-height: 300px;
-            position: relative;
-            margin: 2rem auto;
-            overflow: hidden;
-        }
-
-        #canvas-container canvas {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        @media (max-width: 768px) {
-            #canvas-container {
-                height: 40vh;
-                min-height: 250px;
-            }
-        }
-
-        @keyframes pulseEffect {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        body {
-            overflow-x: hidden;
-            font-family: 'Space Grotesk', sans-serif;
-            background: #000;
-            color: #fff;
-            line-height: 1.6;
-            opacity: 0;
-            animation: fadeIn 1s ease-out forwards;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            /* Optimize scrolling */
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            /* Prevent content reflow */
-            contain: content;
-            /* Improve performance */
-            will-change: transform;
-            /* Enable hardware acceleration */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        canvas {
             position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100vh;
             z-index: 0;
             pointer-events: none;
         }
 
-        #canvas-container {
-            position: fixed;
+        .content {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            border-radius: 10px;
+            margin: 10px;
+            padding: 20px;
+            scroll-margin-top: 20px;
+        }
+
+        #home {
+            background: url('/images/44rem3rsa.png') center/cover no-repeat;
+            position: relative;
+        }
+
+        #home::before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
-            pointer-events: none;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
         }
 
         #menu-btn {
@@ -167,19 +114,12 @@
             top: 20px;
             left: 20px;
             z-index: 1000;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
             border-radius: 8px;
             cursor: pointer;
             padding: 10px;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
-        }
-
-        #menu-btn:hover {
-            background: rgba(0, 0, 0, 0.5);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
+            touch-action: manipulation;
         }
 
         #menu-btn span {
@@ -197,11 +137,11 @@
             left: -300px;
             width: 300px;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.9);
             padding: 80px 20px;
             transition: 0.3s;
             z-index: 999;
+            overflow-y: auto;
         }
 
         #menu.active {
@@ -210,172 +150,47 @@
 
         #menu a {
             display: block;
-            color: rgba(255, 255, 255, 0.7);
+            color: #fff;
             text-decoration: none;
-            padding: 10px 0;
+            padding: 15px 0;
             font-size: 18px;
-            transition: all 0.3s ease;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-            transform: translateX(0);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        #menu a:hover {
-            color: rgba(255, 255, 255, 1);
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-            transform: translateX(10px);
-        }
-
-        .content {
-            position: relative;
-            z-index: 1;
-            padding: clamp(20px, 5vw, 100px) clamp(15px, 3vw, 50px);
-        }
-
-        .section {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(8px);
-            border-radius: clamp(10px, 2vw, 20px);
-            margin: clamp(10px, 2vw, 20px);
-            padding: clamp(20px, 4vw, 40px);
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
-            transform: translateY(20px);
-            animation: sectionFadeIn 1s ease-out forwards;
-            /* Optimize performance */
-            will-change: transform, opacity;
-            /* Enable hardware acceleration */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            /* Prevent content reflow */
-            contain: layout style paint;
-            /* Reduce memory usage */
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-
-        @keyframes sectionFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
             width: 100%;
-            height: 100%;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease-out;
+            max-width: 1200px;
+            margin-top: 3rem;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
         }
 
-        .loading-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
+        .feature {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
         }
 
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 3px solid #ffffff3d;
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
+        .feature h3 {
+            color: #FFD700;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Only apply hover effects on non-touch devices */
-        @media (hover: hover) {
-            .section:hover {
-                background: rgba(0, 0, 0, 0.4);
-                transform: scale(1.02) translateZ(0);
-            }
-        }
-
-        /* Optimize scrolling for touch devices */
-        @media (hover: none) {
-            .section {
-                transition: none;
-            }
-            .section:hover {
-                transform: none;
-            }
-        }
-
-        h1, h2 {
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-            animation: ghostlyGlow 3s infinite alternate;
-        }
-
-        @keyframes ghostlyGlow {
-            from {
-                text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-            }
-            to {
-                text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-            }
-        }
-
-        p {
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
-        }
-
-        p:hover {
-            opacity: 1;
-        }
-
-        /* Enhanced Video Container */
         .video-container {
             position: relative;
             width: 100%;
-            max-width: min(90vw, 800px);
-            margin: clamp(15px, 4vw, 30px) auto;
-            padding-bottom: min(75vh, 56.25%); /* Limit height on tall mobile screens */
+            max-width: 800px;
+            margin: 30px auto;
+            padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
-            border-radius: clamp(8px, 2vw, 15px);
-            box-shadow: 0 clamp(4px, 1vw, 8px) clamp(16px, 4vw, 32px) rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease;
-            background: rgba(0, 0, 0, 0.2);
-            /* Improve touch handling */
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            /* Optimize performance */
-            will-change: transform;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-
-        /* Hover effects only for non-touch devices */
-        @media (hover: hover) {
-            .video-container:hover {
-                transform: scale(1.02);
-            }
-        }
-
-        /* Active state for touch devices */
-        @media (hover: none) {
-            .video-container:active {
-                transform: scale(0.98);
-            }
+            border-radius: 10px;
         }
 
         .video-container iframe {
@@ -385,150 +200,34 @@
             width: 100%;
             height: 100%;
             border: none;
-            /* Improve performance */
-            will-change: transform;
-            /* Enable hardware acceleration */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            /* Smoother scaling */
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-        }
-
-        /* Video container responsive adjustments */
-        @media (max-width: 768px) {
-            .video-container {
-                margin: 15px auto;
-                max-width: 95vw;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .video-container {
-                margin: 10px auto;
-                border-radius: 6px;
-            }
-        }
-
-        /* Landscape mode optimization */
-        @media (max-height: 480px) and (orientation: landscape) {
-            .video-container {
-                max-width: 70vw;
-                padding-bottom: 40%;
-            }
-        }
-
-        .placeholder {
-            width: 80%;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(5px);
-            margin: 20px 0;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            width: 100%;
-            max-width: 1200px;
-            margin-top: 3rem;
-            padding: 0 1rem;
-        }
-
-        .feature {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 2rem;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .feature:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .feature h3 {
-            color: #FFD700;
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-
-        .feature p {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1rem;
-            line-height: 1.6;
         }
 
         .partners-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: clamp(1rem, 3vw, 3rem);
-            margin-top: clamp(2rem, 5vw, 3rem);
-            padding: clamp(1rem, 3vw, 2rem);
-            max-width: 1200px;
+            gap: 2rem;
+            margin-top: 2rem;
             width: 100%;
+            max-width: 1200px;
         }
 
         .partner {
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: clamp(1rem, 3vw, 2rem);
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: clamp(10px, 2vw, 15px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
             backdrop-filter: blur(10px);
-            touch-action: manipulation;
         }
 
         .partner-logo {
             max-width: 100%;
             height: auto;
-            transition: transform 0.3s ease;
-            will-change: transform;
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            /* Optimize image loading */
-            loading: lazy;
-            /* Prevent layout shift */
-            aspect-ratio: attr(width) / attr(height);
-        }
-
-        /* Hover effects for desktop */
-        @media (hover: hover) {
-            .partner:hover {
-                transform: translateY(-8px);
-                background: rgba(255, 255, 255, 0.1);
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            }
-
-            .partner:hover .partner-logo {
-                transform: scale(1.05);
-            }
-        }
-
-        /* Touch effects for mobile */
-        @media (hover: none) {
-            .partner:active {
-                transform: translateY(-4px);
-                background: rgba(255, 255, 255, 0.1);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            }
-
-            .partner:active .partner-logo {
-                transform: scale(1.02);
-            }
         }
 
         .motto {
-            position: absolute; 
+            position: fixed;
             bottom: 2rem;
             left: 50%;
             transform: translateX(-50%);
@@ -536,23 +235,59 @@
             font-size: 1.5rem;
             font-weight: bold;
             text-align: center;
-            padding: 0.5rem 1rem;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 5px;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
         }
 
-        /* Optimize animations for reduced motion preference */
-        @media (prefers-reduced-motion: reduce) {
-            .partner, .partner-logo {
-                transition: none;
+        @media (max-width: 768px) {
+            .section {
+                margin: 5px;
+                padding: 15px;
+                min-height: -webkit-fill-available;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                margin-top: 2rem;
+            }
+            
+            .motto {
+                font-size: 1.2rem;
+                padding: 0.8rem 1.5rem;
+                bottom: 1rem;
             }
 
-            .partner:hover, .partner:active {
-                transform: none;
+            #menu {
+                width: 100%;
+                left: -100%;
             }
 
-            .partner:hover .partner-logo, .partner:active .partner-logo {
-                transform: none;
+            .video-container {
+                margin: 15px auto;
+            }
+
+            .partners-grid {
+                gap: 1rem;
+            }
+
+            h1 {
+                font-size: 1.8rem !important;
+            }
+
+            h2 {
+                font-size: 1.4rem !important;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .motto {
+                position: absolute;
             }
         }
     </style>
@@ -574,17 +309,16 @@
     </nav>
 
     <div class="content">
-        <section id="home" class="section" style="position: relative; min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; background: url('/images/44rem3rsa.png') center/cover fixed no-repeat; padding: 2rem;">
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: 1;"></div>
-            <div style="text-align: center; position: relative; z-index: 2; margin-top: 15vh;">
-                <h1 style="font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem; color: rgba(255, 255, 255, 0.85); font-weight: 600; line-height: 1.3;">Interactive Human-like Characters<br>with Empathy</h1>
-                <h2 style="font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 2rem; color: rgba(255, 255, 255, 0.8); font-weight: 500;">Empowering the Future of Human-AI Interaction</h2>
+        <section id="home" class="section">
+            <div style="text-align: center; margin-top: 15vh; position: relative; z-index: 2;">
+                <h1 style="font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem;">Interactive Human-like Characters<br>with Empathy</h1>
+                <h2 style="font-size: clamp(1.5rem, 3vw, 2rem); margin-bottom: 2rem;">Empowering the Future of Human-AI Interaction</h2>
             </div>
             
             <div id="canvas-container"></div>
             <div class="motto">Empowering people (future)</div>
 
-            <div class="features-grid" style="margin-top: 20vh;">
+            <div class="features-grid">
                 <div class="feature">
                     <h3>Emotional Intelligence</h3>
                     <p>AI characters that understand and respond to human emotions</p>
@@ -605,14 +339,10 @@
             <p>Pioneering the future of human-AI relationships through empathetic digital characters.</p>
             <div class="video-container">
                 <iframe 
-                    width="560" 
-                    height="315" 
                     src="https://www.youtube.com/embed/yCaP1oKKDxE" 
                     title="Interactive AI Video"
-                    frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen
-                    loading="lazy">
+                    allowfullscreen>
                 </iframe>
             </div>
         </section>
@@ -620,7 +350,7 @@
         <section id="services" class="section">
             <h2>Our Services</h2>
             <p>Experience the future of human-AI interaction with our services:</p>
-            <ul>
+            <ul style="margin: 20px 0; list-style-position: inside;">
                 <li>Empathetic AI Character Development</li>
                 <li>Immersive Social Environments</li> 
                 <li>Emotion-Driven Interactions</li>
@@ -633,13 +363,13 @@
             <h2>Our Partners</h2>
             <div class="partners-grid">
                 <div class="partner">
-                    <img src="/images/Lenovo.png" alt="Lenovo" class="partner-logo" width="200" height="200" loading="lazy" decoding="async" fetchpriority="low">
+                    <img src="/images/Lenovo.png" alt="Lenovo" class="partner-logo" loading="lazy">
                 </div>
                 <div class="partner">
-                    <img src="/images/convai.png" alt="Convai" class="partner-logo" width="200" height="200" loading="lazy" decoding="async" fetchpriority="low">
+                    <img src="/images/convai.png" alt="Convai" class="partner-logo" loading="lazy">
                 </div>
                 <div class="partner">
-                    <img src="/images/horizon.png" alt="Horizon" class="partner-logo" width="200" height="200" loading="lazy" decoding="async" fetchpriority="low">
+                    <img src="/images/horizon.png" alt="Horizon" class="partner-logo" loading="lazy">
                 </div>
             </div>
         </section>
@@ -647,7 +377,7 @@
         <section id="contact" class="section">
             <h2>Let's Connect</h2>
             <p>Ready to explore the future of human-AI interaction?</p>
-            <p>Email: contact@interactive-ai.com</p>
+            <p>Email: 4d@emersa.io</p>
             <p>Phone: +4407494355879</p>
             <p>Start your journey towards meaningful AI relationships.</p>
         </section>
@@ -656,5 +386,34 @@
             <p>&copy; 2024 All rights reserved.</p>
         </footer>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.getElementById('menu-btn');
+            const menu = document.getElementById('menu');
+            const menuLinks = menu.querySelectorAll('a');
+
+            menuBtn.addEventListener('click', function() {
+                menu.classList.toggle('active');
+            });
+
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    menu.classList.remove('active');
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('active')) {
+                    menu.classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

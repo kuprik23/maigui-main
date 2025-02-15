@@ -9,7 +9,7 @@ let scrollProgress = 0;
 let isMobile = window.innerWidth <= 768;
 
 // Initialize Three.js scene
-function init() {
+async function init() {
     try {
         // Scene setup
         scene = new THREE.Scene();
@@ -19,29 +19,30 @@ function init() {
             alpha: true,
             powerPreference: "high-performance"
         });
+        renderer.setClearColor(0x000000, 0); // Set transparent background
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // Add lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        // Enhanced lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7); // Increased intensity
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2); // Increased intensity
         directionalLight.position.set(5, 5, 5);
         scene.add(directionalLight);
 
-        // Create loading indicator
-        const loadingOverlay = document.createElement('div');
-        loadingOverlay.className = 'loading-overlay';
-        loadingOverlay.innerHTML = '<div class="loader"></div>';
-        document.body.appendChild(loadingOverlay);
+        // Add additional light from the front
+        const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        frontLight.position.set(0, 0, 5);
+        scene.add(frontLight);
 
-        // Load 3D model
-        loadModel();
+        // Load 3D model first
+        await loadModel();
         
-        // Position camera
-        camera.position.z = 5;
+        // Position camera further back and slightly elevated
+        camera.position.set(0, 2, 8);
+        camera.lookAt(0, 0, 0);
 
         // Event Listeners
         window.addEventListener('mousemove', onMouseMove);
@@ -53,6 +54,9 @@ function init() {
         if (isMobile && window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', onDeviceOrientation);
         }
+
+        // Start animation after everything is loaded
+        animate();
     } catch (error) {
         console.error('Error in init:', error);
     }
@@ -61,40 +65,59 @@ function init() {
 async function loadModel() {
     try {
         const loader = new GLTFLoader();
-        const gltf = await loader.loadAsync('/Golden_Vision_20cm.glb');
+        
+        // Create a promise to handle the loading
+        const loadModelPromise = new Promise((resolve, reject) => {
+            loader.load(
+                '/Golden_Vision_20cm.glb',
+                (gltf) => {
+                    console.log('Model loaded successfully:', gltf);
+                    resolve(gltf);
+                },
+                (progress) => {
+                    console.log('Loading progress:', (progress.loaded / progress.total * 100) + '%');
+                },
+                (error) => {
+                    console.error('Error loading model:', error);
+                    reject(error);
+                }
+            );
+        });
 
+        const gltf = await loadModelPromise;
         model = gltf.scene;
-        model.scale.set(2, 2, 2);
-        model.position.set(0, 0, 0);
-        
-        // Apply CSS animations
-        // Set initial rotation
-        model.rotation.y = Math.PI / 4;
-        
-        // Add continuous rotation
-        function animate() {
-            requestAnimationFrame(animate);
-            if (model) {
-                model.rotation.y += 0.005; // Adjust speed as needed
-            }
-            renderer.render(scene, camera);
-        }
-        animate();
-        
-        scene.add(model);
 
-        // Remove loading overlay
-        const loadingOverlay = document.querySelector('.loading-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.classList.add('hidden');
-            setTimeout(() => loadingOverlay.remove(), 500);
-        }
+        // Log model details
+        console.log('Model geometry:', model.children);
+        
+        // Reset model position and rotation
+        model.position.set(0, 0, 0);
+        model.rotation.set(0, Math.PI / 4, 0);
+        
+        // Compute bounding box
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        
+        // Scale model to reasonable size
+        const scale = 2.5 / Math.max(size.x, size.y, size.z);
+        model.scale.multiplyScalar(scale);
+        
+        // Center model
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.sub(center.multiplyScalar(scale));
+        
+        // Adjust final position
+        model.position.y = -0.5;
+        
+        // Add the model to the scene
+        scene.add(model);
+        
+        console.log('Model added to scene');
+        
+        return true;
     } catch (error) {
         console.error('Error loading model:', error);
-        const loadingOverlay = document.querySelector('.loading-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.innerHTML = '<p style="color: white;">Error loading 3D model. Please try again.</p>';
-        }
+        return false;
     }
 }
 
@@ -139,8 +162,12 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+// Main animation loop
 function animate() {
     requestAnimationFrame(animate);
+    if (model) {
+        model.rotation.y += 0.005;
+    }
     renderer.render(scene, camera);
 }
 
@@ -244,11 +271,10 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // Wait for DOM to be fully loaded before initializing
-function initializeApp() {
+async function initializeApp() {
     try {
         initializeMenu();
-        init(); // Initialize Three.js scene
-        animate();
+        await init(); // Initialize Three.js scene
     } catch (error) {
         console.error('Error during app initialization:', error);
     }
