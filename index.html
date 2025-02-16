@@ -76,6 +76,7 @@
             z-index: 1;
             padding: 20px;
             overflow-y: auto;
+            height: 100vh;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -91,6 +92,7 @@
             margin: 10px;
             padding: 20px;
             scroll-margin-top: 20px;
+            overflow: hidden;
         }
 
         #home {
@@ -226,24 +228,6 @@
             height: auto;
         }
 
-        .motto {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #fff;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-            padding: 1rem 2rem;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            z-index: 10;
-            backdrop-filter: blur(10px);
-            white-space: nowrap;
-        }
-
         @media (max-width: 768px) {
             .section {
                 margin: 5px;
@@ -255,12 +239,6 @@
                 grid-template-columns: 1fr;
                 gap: 1rem;
                 margin-top: 2rem;
-            }
-            
-            .motto {
-                font-size: 1.2rem;
-                padding: 0.8rem 1.5rem;
-                bottom: 1rem;
             }
 
             #menu {
@@ -283,11 +261,14 @@
             h2 {
                 font-size: 1.4rem !important;
             }
-        }
 
-        @media (max-height: 600px) {
-            .motto {
-                position: absolute;
+            .content {
+                height: 100%;
+                padding: 15px;
+            }
+
+            .feature {
+                padding: 1.5rem;
             }
         }
     </style>
@@ -316,7 +297,6 @@
             </div>
             
             <div id="canvas-container"></div>
-            <div class="motto">Empowering people (future)</div>
 
             <div class="features-grid">
                 <div class="feature">
