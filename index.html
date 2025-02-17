@@ -178,30 +178,33 @@
         }
 
         #menu-btn {
-            z-index: 1000;
+            position: relative;
+            z-index: 1001;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             cursor: pointer;
             padding: 12px;
             touch-action: manipulation;
-            min-width: 44px;
-            min-height: 44px;
+            width: 44px;
+            height: 44px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             transition: all 0.3s ease;
             margin-left: 10px;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            pointer-events: auto;
         }
 
         #menu-btn:hover {
             background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-1px);
         }
 
         #menu-btn:active {
-            transform: translateY(1px);
+            transform: scale(0.95);
         }
 
         #menu-btn span {
@@ -229,20 +232,25 @@
         #menu {
             position: fixed;
             top: var(--header-height);
-            left: -100%;
+            left: 0;
             width: 100%;
             height: calc(100vh - var(--header-height));
             height: calc(var(--app-height) - var(--header-height));
             background: rgba(0, 0, 0, 0.95);
             padding: 20px;
-            transition: 0.3s;
-            z-index: 99;
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            transform: translateX(-100%);
+            pointer-events: auto;
+            visibility: visible;
+            opacity: 0;
         }
 
         #menu.active {
-            left: 0;
+            transform: translateX(0);
+            opacity: 1;
         }
 
         #menu a {
@@ -546,11 +554,25 @@
             });
             setAppHeight();
 
-            menuBtn.addEventListener('click', function() {
-                this.classList.toggle('active');
-                menu.classList.toggle('active');
-                document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
-            });
+            function handleMenuClick(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                const willShow = !menu.classList.contains('active');
+                menuBtn.classList.toggle('active', willShow);
+                menu.classList.toggle('active', willShow);
+                document.body.style.overflow = willShow ? 'hidden' : '';
+            }
+
+            menuBtn.addEventListener('click', handleMenuClick, true);
+            menuBtn.addEventListener('touchstart', handleMenuClick, { passive: false });
+
+            document.addEventListener('click', function(e) {
+                if (menu.classList.contains('active') && !menu.contains(e.target) && !menuBtn.contains(e.target)) {
+                    menuBtn.classList.remove('active');
+                    menu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }, true);
 
             menuLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
@@ -564,15 +586,6 @@
                 });
             });
 
-            // Improve touch handling for mobile
-            document.addEventListener('touchstart', function(e) {
-                if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('active')) {
-                    menuBtn.classList.remove('active');
-                    menu.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            }, { passive: true });
-
             // Add scroll listener for header transparency
             let lastScroll = 0;
             const header = document.querySelector('.header-bar');
@@ -580,8 +593,6 @@
             
             window.addEventListener('scroll', () => {
                 const currentScroll = window.pageYOffset;
-                const isScrollingDown = currentScroll > lastScroll;
-                
                 if (currentScroll > 50) {
                     header.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
                     footer.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
@@ -589,7 +600,6 @@
                     header.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
                     footer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
                 }
-                
                 lastScroll = currentScroll;
             }, { passive: true });
         });
