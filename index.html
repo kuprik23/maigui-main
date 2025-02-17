@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/images/icon-192.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
@@ -41,8 +41,7 @@
         }
 
         html {
-            height: -webkit-fill-available;
-            touch-action: manipulation;
+            height: 100%;
         }
 
         body {
@@ -50,12 +49,10 @@
             background: #000;
             color: #fff;
             line-height: 1.6;
-            overflow-x: hidden;
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-            min-height: var(--app-height);
+            margin: 0;
+            padding: 0;
             -webkit-font-smoothing: antialiased;
-            -webkit-touch-callout: none;
+            min-height: 100%;
         }
 
         .header-bar, .footer-bar {
@@ -128,16 +125,7 @@
             padding-bottom: calc(var(--footer-height) + 20px);
             padding-left: max(20px, env(safe-area-inset-left));
             padding-right: max(20px, env(safe-area-inset-right));
-            overflow-y: scroll;
-            height: 100%;
             -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            touch-action: pan-y;
-        }
-
-        .content::-webkit-scrollbar {
-            display: none;
         }
 
         .section {
@@ -592,7 +580,7 @@
                 const willShow = !menu.classList.contains('active');
                 menuBtn.classList.toggle('active', willShow);
                 menu.classList.toggle('active', willShow);
-                document.body.style.overflow = willShow ? 'hidden' : '';
+                document.body.style.overflow = willShow ? 'hidden' : 'auto';
             }
 
             menuBtn.addEventListener('click', handleMenuClick, true);
@@ -602,7 +590,7 @@
                 if (menu.classList.contains('active') && !menu.contains(e.target) && !menuBtn.contains(e.target)) {
                     menuBtn.classList.remove('active');
                     menu.classList.remove('active');
-                    document.body.style.overflow = '';
+                    document.body.style.overflow = 'auto';
                 }
             }, true);
 
@@ -613,7 +601,7 @@
                     const targetSection = document.querySelector(targetId);
                     menuBtn.classList.remove('active');
                     menu.classList.remove('active');
-                    document.body.style.overflow = '';
+                    document.body.style.overflow = 'auto';
                     window.scrollTo({
                         top: targetSection.offsetTop - 70,
                         behavior: 'auto'
