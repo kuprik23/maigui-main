@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/images/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/icon-512.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="description" content="Creating interactive human-like characters with empathy using cutting-edge AI technology">
     <meta name="keywords" content="3D AI, Interactive Characters, Virtual Humans, Empathetic AI, Human-like AI">
     <meta property="og:title" content="Interactive AI Characters">
@@ -15,19 +22,26 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     
     <script type="module" src="js/main.js" crossorigin="anonymous"></script>
     <style>
+        :root {
+            --app-height: 100vh;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         html {
             scroll-behavior: smooth;
             height: -webkit-fill-available;
+            touch-action: manipulation;
         }
 
         body {
@@ -38,7 +52,9 @@
             overflow-x: hidden;
             min-height: 100vh;
             min-height: -webkit-fill-available;
+            min-height: var(--app-height);
             -webkit-font-smoothing: antialiased;
+            -webkit-touch-callout: none;
         }
 
         .hero-background {
@@ -47,6 +63,7 @@
             left: 0;
             width: 100%;
             height: 100vh;
+            height: var(--app-height);
             background: linear-gradient(135deg, #000000, #1a1a1a);
             z-index: -2;
         }
@@ -57,6 +74,7 @@
             left: 0;
             width: 100%;
             height: 100vh;
+            height: var(--app-height);
             background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
             z-index: -1;
         }
@@ -67,6 +85,7 @@
             left: 0;
             width: 100%;
             height: 100vh;
+            height: var(--app-height);
             z-index: 0;
             pointer-events: none;
         }
@@ -75,23 +94,38 @@
             position: relative;
             z-index: 1;
             padding: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: max(20px, env(safe-area-inset-left));
+            padding-right: max(20px, env(safe-area-inset-right));
             overflow-y: auto;
             height: 100vh;
+            height: var(--app-height);
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .content::-webkit-scrollbar {
+            display: none;
         }
 
         .section {
             min-height: 100vh;
+            min-height: var(--app-height);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border-radius: 10px;
             margin: 10px;
             padding: 20px;
-            scroll-margin-top: 20px;
+            scroll-margin-top: max(20px, env(safe-area-inset-top));
             overflow: hidden;
         }
 
@@ -113,37 +147,45 @@
 
         #menu-btn {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: max(20px, env(safe-area-inset-top));
+            left: max(20px, env(safe-area-inset-left));
             z-index: 1000;
             background: rgba(0, 0, 0, 0.5);
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            padding: 10px;
+            padding: 15px;
             touch-action: manipulation;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         #menu-btn span {
             display: block;
-            width: 25px;
-            height: 3px;
+            width: 30px;
+            height: 2px;
             background: #fff;
-            margin: 5px 0;
+            margin: 4px 0;
             transition: 0.3s;
         }
 
         #menu {
             position: fixed;
             top: 0;
-            left: -300px;
-            width: 300px;
+            left: -100%;
+            width: 100%;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 80px 20px;
+            height: var(--app-height);
+            background: rgba(0, 0, 0, 0.95);
+            padding: max(80px, env(safe-area-inset-top)) 20px env(safe-area-inset-bottom);
             transition: 0.3s;
             z-index: 999;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         #menu.active {
@@ -157,6 +199,11 @@
             padding: 15px 0;
             font-size: 18px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .features-grid {
@@ -176,6 +223,7 @@
             padding: 2rem;
             border-radius: 15px;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .feature h3 {
@@ -221,29 +269,59 @@
             background: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .partner-logo {
             max-width: 100%;
             height: auto;
+            width: auto;
+            max-height: 60px;
+        }
+
+        @media (hover: hover) {
+            #menu a:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
+            
+            .feature:hover {
+                transform: translateY(-2px);
+                transition: transform 0.3s ease;
+            }
+        }
+
+        @media (hover: none) {
+            #menu a:active {
+                background: rgba(255, 255, 255, 0.1);
+            }
+            
+            .feature:active {
+                transform: scale(0.98);
+                transition: transform 0.1s ease;
+            }
+        }
+
+        .feature {
+            transition: transform 0.3s ease;
+            touch-action: manipulation;
+        }
+
+        img {
+            content-visibility: auto;
         }
 
         @media (max-width: 768px) {
             .section {
                 margin: 5px;
                 padding: 15px;
-                min-height: -webkit-fill-available;
+                min-height: var(--app-height);
             }
-            
+
             .features-grid {
                 grid-template-columns: 1fr;
                 gap: 1rem;
                 margin-top: 2rem;
-            }
-
-            #menu {
-                width: 100%;
-                left: -100%;
+                padding: 0;
             }
 
             .video-container {
@@ -251,6 +329,7 @@
             }
 
             .partners-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
                 gap: 1rem;
             }
 
@@ -262,13 +341,23 @@
                 font-size: 1.4rem !important;
             }
 
-            .content {
-                height: 100%;
-                padding: 15px;
-            }
-
             .feature {
                 padding: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            #menu a {
+                font-size: 20px;
+                padding: 20px 0;
+            }
+        }
+
+        @supports (-webkit-touch-callout: none) {
+            .section {
+                min-height: -webkit-fill-available;
+            }
+            #menu {
+                height: -webkit-fill-available;
             }
         }
     </style>
@@ -277,7 +366,7 @@
     <div class="hero-background"></div>
     <div class="hero-overlay"></div>
     
-    <button id="menu-btn">
+    <button id="menu-btn" aria-label="Menu">
         <span></span>
         <span></span>
         <span></span>
@@ -373,8 +462,19 @@
             const menu = document.getElementById('menu');
             const menuLinks = menu.querySelectorAll('a');
 
+            // Fix iOS 100vh issue
+            const setAppHeight = () => {
+                document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+            };
+            window.addEventListener('resize', setAppHeight);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(setAppHeight, 100);
+            });
+            setAppHeight();
+
             menuBtn.addEventListener('click', function() {
                 menu.classList.toggle('active');
+                document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
             });
 
             menuLinks.forEach(link => {
@@ -383,16 +483,18 @@
                     const targetId = this.getAttribute('href');
                     const targetSection = document.querySelector(targetId);
                     menu.classList.remove('active');
+                    document.body.style.overflow = '';
                     targetSection.scrollIntoView({ behavior: 'smooth' });
                 });
             });
 
-            // Close menu when clicking outside
-            document.addEventListener('click', function(e) {
+            // Improve touch handling for mobile
+            document.addEventListener('touchstart', function(e) {
                 if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('active')) {
                     menu.classList.remove('active');
+                    document.body.style.overflow = '';
                 }
-            });
+            }, { passive: true });
         });
     </script>
 </body>
