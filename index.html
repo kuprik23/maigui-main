@@ -45,6 +45,7 @@
             scroll-behavior: smooth;
             height: -webkit-fill-available;
             touch-action: manipulation;
+            overscroll-behavior-y: none;
         }
 
         body {
@@ -58,6 +59,7 @@
             min-height: var(--app-height);
             -webkit-font-smoothing: antialiased;
             -webkit-touch-callout: none;
+            overscroll-behavior-y: none;
         }
 
         .header-bar, .footer-bar {
@@ -130,14 +132,15 @@
             padding-bottom: calc(var(--footer-height) + 20px);
             padding-left: max(20px, env(safe-area-inset-left));
             padding-right: max(20px, env(safe-area-inset-right));
-            overflow-y: auto;
+            overflow-y: scroll;
             height: 100vh;
             height: var(--app-height);
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: contain;
+            overscroll-behavior-y: none;
             scroll-behavior: smooth;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            touch-action: pan-y;
         }
 
         .content::-webkit-scrollbar {
@@ -175,6 +178,37 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.3);
             z-index: 1;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            margin-top: 2rem;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            min-width: 200px;
+            position: relative;
+            z-index: 2;
+            text-shadow: none;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .cta-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
         }
 
         #menu-btn {
@@ -387,6 +421,10 @@
             .feature:active {
                 transform: scale(0.98);
             }
+
+            .cta-button:active {
+                transform: scale(0.98);
+            }
         }
 
         img {
@@ -428,6 +466,12 @@
             .home-text {
                 margin-top: 10vh;
             }
+
+            .cta-button {
+                padding: 12px 24px;
+                font-size: 1.1rem;
+                min-width: 180px;
+            }
         }
 
         @supports (-webkit-touch-callout: none) {
@@ -463,6 +507,7 @@
             <div class="home-text">
                 <h1>Interactive Human-like Characters<br>with Empathy</h1>
                 <h2>Empowering the Future of Human-AI Interaction</h2>
+                <a href="mailto:4d@emersa.io" class="cta-button">Contact Us Now</a>
             </div>
             
             <div id="canvas-container"></div>
@@ -529,6 +574,7 @@
             <p>Email: 4d@emersa.io</p>
             <p>Phone: +4407494355879</p>
             <p>Start your journey towards meaningful AI relationships.</p>
+            <a href="mailto:4d@emersa.io" class="cta-button">Email Us Now</a>
         </section>
     </div>
 
