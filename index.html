@@ -256,27 +256,36 @@
         #menu {
             position: fixed;
             top: var(--header-height);
-            left: 0;
-            width: 100%;
-            height: calc(100vh - var(--header-height));
-            height: calc(var(--app-height) - var(--header-height));
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            width: 300px;
             background: rgba(0, 0, 0, 0.95);
             padding: var(--spacing-unit);
-            transition: transform 0.3s ease-in-out;
+            transition: all 0.3s ease;
             z-index: 1000;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            transform: translateX(-100%);
-            pointer-events: auto;
-            visibility: visible;
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
             opacity: 0;
+            visibility: hidden;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
 
         #menu.active {
-            transform: translateX(0);
+            transform: translateX(-50%) translateY(0);
             opacity: 1;
+            visibility: visible;
+        }
+
+        #menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid rgba(0, 0, 0, 0.95);
         }
 
         #menu a {
@@ -400,6 +409,140 @@
             transform: translateY(-2px);
         }
 
+        .clients-banner {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            padding: 30px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .clients-banner::before,
+        .clients-banner::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            width: 100px;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .clients-banner::before {
+            left: 0;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.8), transparent);
+        }
+
+        .clients-banner::after {
+            right: 0;
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.8), transparent);
+        }
+
+        .clients-track {
+            display: flex;
+            animation: scroll 40s linear infinite;
+            width: fit-content;
+        }
+
+        .clients-track:hover {
+            animation-play-state: paused;
+        }
+
+        .client {
+            flex: 0 0 auto;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .client img {
+            height: 45px;
+            width: auto;
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .client img:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-50% - 20px));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .clients-banner {
+                padding: 20px 0;
+            }
+
+            .client {
+                padding: 0 25px;
+            }
+
+            .client img {
+                height: 35px;
+            }
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 2rem;
+        }
+
+        .job-posting {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .job-posting h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .job-details h4 {
+            color: var(--text-color);
+            margin: 1.5rem 0 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .job-details ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .job-details li {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .job-details li::before {
+            content: "•";
+            color: var(--primary-color);
+            position: absolute;
+            left: 0;
+        }
+
+
         .partner-logo {
             max-width: 100%;
             height: auto;
@@ -516,9 +659,10 @@
         </button>
     </header>
 
-    <nav id="menu">
+    <nav id="menu" class="menu-overlay">
         <a href="#about">About</a>
         <a href="#services">Services</a>
+        <a href="#careers">Careers</a>
         <a href="#contact">Contact</a>
     </nav>
 
@@ -527,7 +671,7 @@
             <div class="home-text">
                 <h1>Interactive Human-like Characters<br>with Empathy</h1>
                 <h2>Empowering the Future of Human-AI Interaction</h2>
-                <a href="mailto:4d@emersa.io" class="cta-button">Contact Us Now</a>
+                <a href="mailto:4d@emersa.io" class="cta-button">Book Demo</a>
             </div>
             
             <div id="canvas-container"></div>
@@ -588,13 +732,67 @@
             </div>
         </section>
 
+        <section id="clients" class="section">
+            <h2>Our Clients</h2>
+            <div class="clients-banner">
+                <div class="clients-track">
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Telefonica.svg" alt="Telefonica" loading="lazy"></div>
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/commons/3/35/LVMH_Logo.svg" alt="LVMH" loading="lazy"></div>
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/commons/9/92/Audi-Logo_2016.svg" alt="AUDI" loading="lazy"></div>
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="GOOGLE" loading="lazy"></div>
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/en/c/cf/Bank_of_Montreal_Logo.svg" alt="Bank Of Montreal" loading="lazy"></div>
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/commons/7/79/Under_armour_logo.svg" alt="Under Armour" loading="lazy"></div>
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" loading="lazy"></div>
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f1/NHS-Logo.svg" alt="NHS" loading="lazy"></div>
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/commons/9/92/Issey_Miyake_logo.svg" alt="Issey Miyake" loading="lazy"></div>
+                    <div class="client"><img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Harrods_Logo.svg" alt="Harrods" loading="lazy"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="careers" class="section">
+            <h2>Join Our Team</h2>
+            <div class="jobs-grid">
+                <div class="job-posting">
+                    <h3>Senior Data Analyst</h3>
+                    <div class="job-details">
+                        <h4>About the Role</h4>
+                        <p>Lead data analysis initiatives and drive insights for our AI character development.</p>
+                        <h4>Requirements</h4>
+                        <ul>
+                            <li>5+ years experience in data analysis</li>
+                            <li>Strong background in machine learning</li>
+                            <li>Experience with large language models</li>
+                            <li>Excellent communication skills</li>
+                        </ul>
+                        <a href="mailto:4d@emersa.io" class="cta-button">Apply Now</a>
+                    </div>
+                </div>
+                <div class="job-posting">
+                    <h3>Community Intern</h3>
+                    <div class="job-details">
+                        <h4>About the Role</h4>
+                        <p>Support our community engagement initiatives and help shape the future of AI interactions.</p>
+                        <h4>Requirements</h4>
+                        <ul>
+                            <li>Strong interest in AI and technology</li>
+                            <li>Excellent communication skills</li>
+                            <li>Creative problem-solving abilities</li>
+                            <li>Social media management experience</li>
+                        </ul>
+                        <a href="mailto:4d@emersa.io" class="cta-button">Apply Now</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="contact" class="section">
             <h2>Let's Connect</h2>
             <p>Ready to explore the future of human-AI interaction?</p>
             <p>Email: 4d@emersa.io</p>
             <p>Phone: +4407494355879</p>
             <p>Start your journey towards meaningful AI relationships.</p>
-            <a href="mailto:4d@emersa.io" class="cta-button">Email Us Now</a>
+            <a href="mailto:4d@emersa.io" class="cta-button">Contact Emersa</a>
         </section>
     </div>
 
@@ -671,6 +869,16 @@
                 }
                 lastScroll = currentScroll;
             }, { passive: true });
+
+            // Clone clients for infinite scroll
+            const clientsTrack = document.querySelector('.clients-track');
+            if (clientsTrack) {
+                const originalContent = clientsTrack.innerHTML;
+                clientsTrack.innerHTML = originalContent + originalContent;
+            }
+
+            // Smooth scroll behavior
+            document.documentElement.style.scrollBehavior = 'smooth';
         });
     </script>
 </body>
