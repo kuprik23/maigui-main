@@ -62,9 +62,58 @@
             -webkit-font-smoothing: antialiased;
             min-height: 100%;
             letter-spacing: 0.01em;
+            overflow: hidden;
+            overscroll-behavior-y: none;
+            -webkit-overflow-scrolling: touch;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             overflow-y: auto;
             overflow-x: hidden;
-            overscroll-behavior-y: none;
+            -webkit-overflow-scrolling: touch;
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            z-index: 1;
+            touch-action: pan-y;
+            -webkit-transform: translateZ(0);
+            -moz-transform: translateZ(0);
+            -ms-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-perspective: 1000;
+            -moz-perspective: 1000;
+            -ms-perspective: 1000;
+            perspective: 1000;
+            -webkit-backface-visibility: hidden;
+            -moz-backface-visibility: hidden;
+            -ms-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+
+        /* Optimize sections for mobile */
+        .section {
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+            will-change: transform;
+            min-height: auto;
+            padding: calc(var(--spacing-unit) * 1.5);
+            margin-bottom: var(--spacing-unit);
+        }
+
+        /* Optimize images for performance */
+        img {
+            content-visibility: auto;
+            contain: paint;
+            will-change: transform;
         }
 
         .header-bar, .footer-bar {
@@ -149,14 +198,14 @@
         }
 
         .content {
-            position: relative;
-            z-index: 1;
             padding: var(--spacing-unit);
             padding-top: calc(var(--header-height) + var(--spacing-unit));
             padding-bottom: calc(var(--footer-height) + var(--spacing-unit));
             padding-left: max(var(--spacing-unit), env(safe-area-inset-left));
             padding-right: max(var(--spacing-unit), env(safe-area-inset-right));
             -webkit-overflow-scrolling: touch;
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
         }
 
         .section {
@@ -595,9 +644,52 @@
                 --spacing-unit: 0.875rem;
             }
 
+            body {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .content {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
             .section {
                 margin: calc(var(--spacing-unit) / 2);
                 padding: var(--spacing-unit);
+                min-height: auto;
+                padding-bottom: calc(var(--spacing-unit) * 2);
+                transform: translate3d(0, 0, 0);
+            }
+
+            .features-grid,
+            .partners-grid,
+            .jobs-grid {
+                transform: translate3d(0, 0, 0);
+                will-change: transform;
+            }
+
+            .feature,
+            .partner,
+            .job-posting {
+                transform: translate3d(0, 0, 0);
+                transition: none;
+            }
+
+            .clients-banner {
+                transform: translate3d(0, 0, 0);
+                will-change: transform;
+            }
+
+            .clients-track {
+                animation-duration: 30s;
             }
 
             .features-grid {
@@ -619,21 +711,81 @@
             .feature {
                 padding: calc(var(--spacing-unit) * 1.5);
                 margin-bottom: var(--spacing-unit);
+                transform: none;
+                transition: none;
+            }
+
+            .feature:hover {
+                transform: none;
+            }
+
+            #menu {
+                width: 100%;
+                max-width: none;
+                border-radius: 0;
+                left: 0;
+                transform: translateY(-100%);
+            }
+
+            #menu.active {
+                transform: translateY(0);
+            }
+
+            #menu::before {
+                display: none;
             }
 
             #menu a {
-                font-size: 20px;
-                padding: calc(var(--spacing-unit) * 1.5);
+                font-size: 18px;
+                padding: calc(var(--spacing-unit) * 1.25);
+                min-height: 50px;
             }
 
             .home-text {
-                margin-top: 10vh;
+                margin-top: 8vh;
             }
 
             .cta-button {
-                padding: 14px 28px;
+                padding: 12px 24px;
                 font-size: 1.1rem;
-                min-width: 180px;
+                min-width: 160px;
+                margin-top: calc(var(--spacing-unit) * 1.5);
+            }
+
+            .clients-banner {
+                padding: 15px 0;
+            }
+
+            .client {
+                padding: 0 20px;
+            }
+
+            .client img {
+                height: 30px;
+            }
+
+            .jobs-grid {
+                gap: 1.5rem;
+            }
+
+            .job-posting {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Disable hover effects on touch devices */
+        @media (hover: none) {
+            .feature:hover,
+            .partner:hover,
+            .client img:hover,
+            .cta-button:hover {
+                transform: none;
+            }
+
+            .feature:active,
+            .partner:active,
+            .cta-button:active {
+                transform: scale(0.98);
             }
         }
 
@@ -877,8 +1029,94 @@
                 clientsTrack.innerHTML = originalContent + originalContent;
             }
 
-            // Smooth scroll behavior
-            document.documentElement.style.scrollBehavior = 'smooth';
+            // Enhanced smooth scroll with momentum
+            let touchStartY = 0;
+            let touchEndY = 0;
+            let momentumID = null;
+            const content = document.querySelector('.content');
+
+            content.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+                if (momentumID !== null) {
+                    cancelAnimationFrame(momentumID);
+                    momentumID = null;
+                }
+            }, { passive: true });
+
+            content.addEventListener('touchend', (e) => {
+                touchEndY = e.changedTouches[0].clientY;
+                const distance = touchStartY - touchEndY;
+                const speed = Math.abs(distance) / 100;
+                
+                if (Math.abs(distance) > 50) {
+                    const direction = distance > 0 ? 1 : -1;
+                    let velocity = Math.min(speed * 30, 50);
+                    
+                    const scroll = () => {
+                        content.scrollTop += direction * velocity;
+                        velocity *= 0.95;
+                        
+                        if (Math.abs(velocity) > 0.5) {
+                            momentumID = requestAnimationFrame(scroll);
+                        }
+                    };
+                    
+                    momentumID = requestAnimationFrame(scroll);
+                }
+            }, { passive: true });
+
+            // Optimized anchor navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        const headerOffset = 80;
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + content.scrollTop - headerOffset;
+                        
+                        const start = content.scrollTop;
+                        const change = offsetPosition - start;
+                        const duration = 500;
+                        let startTime = null;
+
+                        const animation = (currentTime) => {
+                            if (startTime === null) startTime = currentTime;
+                            const timeElapsed = currentTime - startTime;
+                            const progress = Math.min(timeElapsed / duration, 1);
+                            
+                            const easeInOutQuad = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+                            content.scrollTop = start + change * easeInOutQuad(progress);
+
+                            if (timeElapsed < duration) {
+                                requestAnimationFrame(animation);
+                            }
+                        };
+                        
+                        requestAnimationFrame(animation);
+                    }
+                });
+            });
+
+            // Optimize scroll performance
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const currentScroll = window.pageYOffset;
+                        if (currentScroll > 50) {
+                            header.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+                            footer.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+                        } else {
+                            header.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                            footer.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                        }
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
         });
     </script>
 </body>
