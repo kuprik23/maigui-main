@@ -1,129 +1,83 @@
-import { SequenceProvider } from '@0xsequence/provider';
-import * as jwt from '../../utils/jwt';
-import * as crypto from 'crypto';
+import { generateToken, verifyToken } from '../../utils/jwt';
 
-interface AuthResult {
-  token: string;
-  user: {
-    id: string;
-    address: string;
-  };
-}
-
+/**
+ * Authentication service for Sequence wallet
+ */
 export class SequenceAuthService {
   private readonly jwtSecret: string;
-  private readonly tokenExpiry: string;
-  private readonly nonceMap: Map<string, { nonce: string; expires: number }>;
-  private readonly NONCE_EXPIRY = 5 * 60 * 1000; // 5 minutes
-
-  constructor(jwtSecret: string, tokenExpiry = '24h') {
-    this.jwtSecret = jwtSecret;
-    this.tokenExpiry = tokenExpiry;
-    this.nonceMap = new Map();
-  }
-
+  
   /**
-   * Generate a challenge message for the user to sign
+   * Initialize Sequence auth service
+   * @param jwtSecret Secret key for JWT signing
+   */
+  constructor(jwtSecret: string) {
+    this.jwtSecret = jwtSecret;
+  }
+  
+  /**
+   * Generate an authentication challenge for a wallet address
+   * @param address Wallet address to authenticate
+   * @returns Challenge message to sign
    */
   async generateAuthChallenge(address: string): Promise<string> {
-    const nonce = crypto.randomBytes(32).toString('hex');
+    // Create a unique challenge with timestamp
     const timestamp = Date.now();
+    const nonce = Math.floor(Math.random() * 1000000);
     
-    // Store nonce with expiry
-    this.nonceMap.set(address.toLowerCase(), {
-      nonce,
-      expires: timestamp + this.NONCE_EXPIRY
-    });
-    
-    return `Sign in to Em3rsa\nAddress: ${address}\nNonce: ${nonce}\nTimestamp: ${timestamp}`;
+    return `Sign this message to authenticate with Em3rsa: ${address.toLowerCase()}:${timestamp}:${nonce}`;
   }
-
+  
   /**
-   * Verify a signature from Sequence wallet
+   * Verify a signature from a wallet
+   * @param message The message that was signed
+   * @param signature The signature to verify
+   * @param address The wallet address that signed
+   * @returns True if signature is valid
    */
-  async verifySignature(
-    message: string,
-    signature: string,
-    address: string
-  ): Promise<boolean> {
+  async verifySignature(message: string, signature: string, address: string): Promise<boolean> {
     try {
-      // Extract nonce from message
-      const nonceMatch = message.match(/Nonce: ([a-f0-9]+)/i);
-      if (!nonceMatch) {
-        throw new Error('Invalid message format');
+      // In a real implementation, we would use ethers.js or similar to verify
+      // For this demo, we'll simulate verification
+      console.log(`Verifying signature for ${address}`);
+      console.log(`Message: ${message}`);
+      console.log(`Signature: ${signature}`);
+      
+      // Check if the message format is correct
+      if (!message.startsWith('Sign this message to authenticate with Em3rsa:')) {
+        return false;
       }
       
-      const nonce = nonceMatch[1];
-      const storedNonceData = this.nonceMap.get(address.toLowerCase());
-      
-      // Verify nonce exists and hasn't expired
-      if (!storedNonceData) {
-        throw new Error('No authentication challenge found');
+      // Check if the address in the message matches
+      const parts = message.split(':');
+      if (parts.length < 3 || parts[1].toLowerCase() !== address.toLowerCase()) {
+        return false;
       }
       
-      if (Date.now() > storedNonceData.expires) {
-        this.nonceMap.delete(address.toLowerCase());
-        throw new Error('Authentication challenge expired');
-      }
-      
-      if (storedNonceData.nonce !== nonce) {
-        throw new Error('Invalid nonce');
-      }
-      
-      // For now, we'll use a simplified verification since we don't have direct access to Sequence SDK
-      // In a real implementation, you would use the Sequence SDK's verification method
-      // This is a placeholder for demonstration purposes
-      const isValid = true; // Simulated verification
-      
-      // Clean up used nonce
-      if (isValid) {
-        this.nonceMap.delete(address.toLowerCase());
-      }
-      
-      return isValid;
+      // In a real implementation, we would verify the signature cryptographically
+      // For this demo, we'll assume it's valid if the format is correct
+      return true;
     } catch (error) {
       console.error('Signature verification error:', error);
       return false;
     }
   }
-
+  
   /**
-   * Generate a JWT token for the authenticated user
+   * Generate a JWT token for an authenticated user
+   * @param userId User ID in the database
+   * @param address Wallet address
+   * @returns JWT token
    */
   generateToken(userId: string, address: string): string {
-    return jwt.sign(
-      {
-        sub: userId,
-        address: address.toLowerCase(),
-        iat: Math.floor(Date.now() / 1000)
-      },
-      this.jwtSecret,
-      { expiresIn: this.tokenExpiry }
-    );
+    return generateToken(userId, this.jwtSecret, '7d');
   }
-
+  
   /**
    * Verify a JWT token
+   * @param token JWT token to verify
+   * @returns Decoded token payload or null if invalid
    */
-  verifyToken(token: string): any {
-    try {
-      return jwt.verify(token, this.jwtSecret);
-    } catch (error) {
-      return null;
-    }
-  }
-
-  /**
-   * Initialize Sequence provider
-   */
-  static async initProvider(): Promise<SequenceProvider> {
-    // This is a simplified initialization for demonstration
-    // In a real implementation, you would use the actual Sequence SDK
-    const provider = new SequenceProvider({
-      networkId: 1, // Ethereum mainnet
-      defaultNetwork: 'mainnet'
-    });
-    
-    return provider;
+  verifyToken(token: string): { sub: string } | null {
+    return verifyToken(token, this.jwtSecret);
   }
 }

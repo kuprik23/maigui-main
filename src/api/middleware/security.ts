@@ -1,51 +1,53 @@
 import { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
 import cors from 'cors';
+import helmet from 'helmet';
 
-// Rate limiting middleware
+/**
+ * Rate limiter middleware to prevent abuse
+ */
 export const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: 'Too many requests from this IP, please try again after 15 minutes',
+  skip: (req) => {
+    // Skip rate limiting for webhook endpoints
+    return req.path.includes('/webhook');
+  }
 });
 
-// Enhanced security headers middleware
+/**
+ * Security headers middleware
+ */
 export const securityHeaders = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Needed for Three.js
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      imgSrc: ["'self'", "data:", "https://*.stripe.com", "https://upload.wikimedia.org"],
+      connectSrc: ["'self'", "https://api.stripe.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      connectSrc: ["'self'", "https://api.stripe.com", "wss:", "https:"],
-      frameSrc: ["'self'", "https://js.stripe.com", "https://www.youtube.com"],
       objectSrc: ["'none'"],
-      upgradeInsecureRequests: [],
-    },
+      mediaSrc: ["'self'"],
+      frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com", "https://www.youtube.com"]
+    }
   },
-  crossOriginEmbedderPolicy: false, // Set to true in production
-  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  dnsPrefetchControl: { allow: true },
-  frameguard: { action: "deny" },
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true,
-  },
-  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  crossOriginEmbedderPolicy: false, // Allow embedding of resources from other origins
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Allow popups for auth
+  crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow cross-origin resource sharing
 });
 
-// CORS configuration
+/**
+ * CORS middleware configuration
+ */
 export const corsOptions = cors({
   origin: (origin, callback) => {
-    // In production, replace with your actual domains
-    const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
+    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000'];
     
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -53,48 +55,52 @@ export const corsOptions = cors({
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'stripe-signature'],
   credentials: true,
-  maxAge: 86400, // 24 hours
+  maxAge: 86400 // 24 hours
 });
 
-// Error handling middleware
-export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error:', err);
+/**
+ * Error handling middleware
+ */
+export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error('Error:', err.message);
+  console.error(err.stack);
   
-  // Security best practice: don't expose error details in production
-  const isProd = process.env.NODE_ENV === 'production';
+  // Check if headers have already been sent
+  if (res.headersSent) {
+    return next(err);
+  }
   
-  const statusCode = err.statusCode || 500;
-  const message = isProd && statusCode === 500 
-    ? 'Internal Server Error' 
-    : err.message || 'Something went wrong';
+  // Handle specific error types
+  if (err.message.includes('Not allowed by CORS')) {
+    return res.status(403).json({
+      error: 'CORS Error',
+      message: 'Origin not allowed'
+    });
+  }
   
-  res.status(statusCode).json({
-    error: {
-      message,
-      status: statusCode,
-      ...(isProd ? {} : { stack: err.stack })
-    }
+  // Handle Stripe errors
+  if (err.message.includes('Stripe')) {
+    return res.status(400).json({
+      error: 'Payment Error',
+      message: err.message
+    });
+  }
+  
+  // Handle JWT errors
+  if (err.message.includes('jwt')) {
+    return res.status(401).json({
+      error: 'Authentication Error',
+      message: 'Invalid or expired token'
+    });
+  }
+  
+  // Default error response
+  res.status(500).json({
+    error: 'Server Error',
+    message: process.env.NODE_ENV === 'production' 
+      ? 'An unexpected error occurred' 
+      : err.message
   });
-};
-
-// Request validation middleware
-export const validateRequest = (schema: any) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { error } = schema.validate(req.body);
-      if (error) {
-        return res.status(400).json({
-          error: {
-            message: 'Validation error',
-            details: error.details.map((detail: any) => detail.message)
-          }
-        });
-      }
-      next();
-    } catch (err) {
-      next(err);
-    }
-  };
 };

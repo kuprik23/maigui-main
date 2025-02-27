@@ -30,7 +30,7 @@ model Subscription {
   id                 String   @id @default(uuid())
   userId             String   @unique
   user               User     @relation(fields: [userId], references: [id])
-  plan               Plan     
+  plan               String   // "FREE", "PRO", "ENTERPRISE"
   stripeCustomerId   String?
   stripeSubId        String?
   monthlyMinutes     Int      // Free: 5, Pro: 500, Enterprise: Unlimited
@@ -61,8 +61,5 @@ model SecurityLog {
   createdAt DateTime @default(now())
 }
 
-enum Plan {
-  FREE
-  PRO
-  ENTERPRISE
-}
+// Note: SQLite doesn't support enums, so we use String instead
+// Valid plan values: "FREE", "PRO", "ENTERPRISE"

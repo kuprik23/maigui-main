@@ -1,78 +1,43 @@
-/**
- * JWT utility functions for authentication
- */
+import jwt from 'jsonwebtoken';
 
+// Create a type declaration for the JWT payload
 interface JwtPayload {
-  sub: string;
-  address: string;
-  iat: number;
-  exp?: number;
+  sub: string;  // Subject (user ID)
+  iat?: number; // Issued at
+  exp?: number; // Expiration time
+  [key: string]: any; // Allow any additional properties
 }
 
 /**
- * Sign a JWT token
+ * Generate a JWT token
  */
-export function sign(
-  payload: JwtPayload | object,
-  secret: string,
-  options?: { expiresIn: string | number }
-): string {
-  // In a real implementation, this would use the jsonwebtoken library
-  // This is a simplified mock implementation for demonstration purposes
-  const now = Math.floor(Date.now() / 1000);
-  const expiresIn = typeof options?.expiresIn === 'string' 
-    ? parseExpiresIn(options.expiresIn) 
-    : (options?.expiresIn || 3600);
-  
-  const tokenPayload = {
-    ...payload,
-    iat: now,
-    exp: now + expiresIn
+export function generateToken(userId: string, secret: string, expiresIn = '7d'): string {
+  const payload: JwtPayload = {
+    sub: userId
   };
   
-  // Mock token generation - in a real app, use the actual jwt library
-  return Buffer.from(JSON.stringify(tokenPayload)).toString('base64');
+  return jwt.sign(payload, secret, { expiresIn });
 }
 
 /**
  * Verify a JWT token
  */
-export function verify(token: string, secret: string): JwtPayload | null {
+export function verifyToken(token: string, secret: string): JwtPayload | null {
   try {
-    // In a real implementation, this would use the jsonwebtoken library
-    // This is a simplified mock implementation for demonstration purposes
-    const payload = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
-    
-    // Check if token is expired
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp && payload.exp < now) {
-      return null;
-    }
-    
-    return payload;
+    return jwt.verify(token, secret) as JwtPayload;
   } catch (error) {
+    console.error('JWT verification error:', error);
     return null;
   }
 }
 
 /**
- * Parse expiration time string (e.g., '1h', '7d') to seconds
+ * Generate a refresh token with longer expiration
  */
-function parseExpiresIn(expiresIn: string): number {
-  const match = expiresIn.match(/^(\d+)([smhdw])$/);
-  if (!match) {
-    return 3600; // Default to 1 hour
-  }
+export function generateRefreshToken(userId: string, secret: string): string {
+  const payload: JwtPayload = {
+    sub: userId
+  };
   
-  const value = parseInt(match[1], 10);
-  const unit = match[2];
-  
-  switch (unit) {
-    case 's': return value;
-    case 'm': return value * 60;
-    case 'h': return value * 60 * 60;
-    case 'd': return value * 24 * 60 * 60;
-    case 'w': return value * 7 * 24 * 60 * 60;
-    default: return 3600;
-  }
+  return jwt.sign(payload, secret, { expiresIn: '30d' });
 }

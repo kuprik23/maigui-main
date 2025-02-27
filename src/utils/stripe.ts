@@ -1,11 +1,13 @@
 import Stripe from 'stripe';
 
-// Define Plan enum (matches Prisma schema)
-export enum Plan {
-  FREE = 'FREE',
-  PRO = 'PRO',
-  ENTERPRISE = 'ENTERPRISE'
-}
+// Define Plan constants (matches Prisma schema string values)
+export const Plan = {
+  FREE: 'FREE',
+  PRO: 'PRO',
+  ENTERPRISE: 'ENTERPRISE'
+} as const;
+
+export type PlanType = typeof Plan[keyof typeof Plan];
 
 // Initialize Stripe with the secret key from environment variables
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -13,14 +15,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 });
 
 // Plan pricing configuration
-const PLAN_PRICES: Record<Plan, number | undefined> = {
+const PLAN_PRICES: Record<string, number | undefined> = {
   [Plan.FREE]: 0,
   [Plan.PRO]: 5000, // $50.00
   [Plan.ENTERPRISE]: undefined, // Custom pricing
 };
 
 // Minutes per month for each plan
-const PLAN_MINUTES = {
+const PLAN_MINUTES: Record<string, number> = {
   [Plan.FREE]: 5,
   [Plan.PRO]: 500,
   [Plan.ENTERPRISE]: 9999, // Effectively unlimited
@@ -46,7 +48,7 @@ export async function createCustomer(
  */
 export async function createSubscription(
   customerId: string,
-  plan: Plan
+  plan: string
 ): Promise<{
   subscriptionId: string;
   clientSecret?: string;
@@ -127,7 +129,7 @@ export async function cancelSubscription(
  */
 export async function updateSubscription(
   subscriptionId: string,
-  newPlan: Plan,
+  newPlan: string,
   customerId: string
 ): Promise<{
   subscriptionId: string;
@@ -202,7 +204,7 @@ export async function updateSubscription(
 /**
  * Get minutes allowed for a plan
  */
-export function getPlanMinutes(plan: Plan): number {
+export function getPlanMinutes(plan: string): number {
   return PLAN_MINUTES[plan];
 }
 

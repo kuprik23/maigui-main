@@ -6,7 +6,8 @@ import {
   createSubscription, 
   updateSubscription, 
   cancelSubscription,
-  getPlanMinutes
+  getPlanMinutes,
+  PlanType
 } from '../../utils/stripe';
 
 const router = express.Router();
@@ -46,7 +47,7 @@ router.post('/', authenticate, async (req, res, next) => {
   try {
     const { plan } = req.body;
     
-    if (!plan || !Object.values(Plan).includes(plan)) {
+    if (!plan || !Object.values(Plan).includes(plan as PlanType)) {
       return res.status(400).json({ error: 'Invalid plan' });
     }
     
@@ -90,7 +91,7 @@ router.post('/', authenticate, async (req, res, next) => {
       // Update subscription in Stripe
       result = await updateSubscription(
         user.subscription.stripeSubId || 'free_plan',
-        plan as Plan,
+        plan,
         stripeCustomerId || ''
       );
       
@@ -99,7 +100,7 @@ router.post('/', authenticate, async (req, res, next) => {
         where: { id: user.subscription.id },
         data: {
           plan: plan,
-          monthlyMinutes: getPlanMinutes(plan as Plan),
+          monthlyMinutes: getPlanMinutes(plan),
           status: result.status,
           stripeSubId: result.subscriptionId,
           stripeCustomerId: stripeCustomerId || undefined
@@ -117,7 +118,7 @@ router.post('/', authenticate, async (req, res, next) => {
       // Create subscription in Stripe
       result = await createSubscription(
         stripeCustomerId || '',
-        plan as Plan
+        plan
       );
       
       // Create subscription in database
@@ -125,7 +126,7 @@ router.post('/', authenticate, async (req, res, next) => {
         data: {
           userId: user.id,
           plan: plan,
-          monthlyMinutes: getPlanMinutes(plan as Plan),
+          monthlyMinutes: getPlanMinutes(plan),
           status: result.status,
           stripeSubId: result.subscriptionId,
           stripeCustomerId: stripeCustomerId
@@ -151,7 +152,7 @@ router.post('/', authenticate, async (req, res, next) => {
       plan,
       status: result.status,
       clientSecret: result.clientSecret,
-      monthlyMinutes: getPlanMinutes(plan as Plan)
+      monthlyMinutes: getPlanMinutes(plan)
     });
   } catch (error) {
     next(error);
@@ -182,7 +183,7 @@ router.delete('/', authenticate, async (req, res, next) => {
     await req.prisma.subscription.update({
       where: { id: user.subscription.id },
       data: {
-        plan: Plan.FREE,
+          plan: Plan.FREE,
         monthlyMinutes: getPlanMinutes(Plan.FREE),
         status: 'canceled',
         stripeSubId: 'free_plan',
