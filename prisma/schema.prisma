@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String?   @unique
+  name          String?
+  sequenceId    String?   @unique
+  googleId      String?   @unique
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret String?
+  emailVerified DateTime?
+  subscription  Subscription?
+  interactions  Interaction[]
+  securityLogs  SecurityLog[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Subscription {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id])
+  plan               Plan     
+  stripeCustomerId   String?
+  stripeSubId        String?
+  monthlyMinutes     Int      // Free: 5, Pro: 500, Enterprise: Unlimited
+  status             String
+  startDate          DateTime @default(now())
+  endDate            DateTime?
+}
+
+model Interaction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  sessionStart DateTime
+  duration    Int      // in seconds
+  type        String   // "webgl", "chat", etc.
+  createdAt   DateTime @default(now())
+}
+
+model SecurityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  ipAddress String
+  userAgent String?
+  success   Boolean
+  details   String?
+  createdAt DateTime @default(now())
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
